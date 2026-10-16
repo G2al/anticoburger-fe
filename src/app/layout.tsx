@@ -3,6 +3,7 @@ import { Geist } from "next/font/google";
 import "./globals.css";
 import { OfflineBanner } from "@/components/layout/offline-banner";
 import { Providers } from "@/components/providers";
+import { DisableZoom } from "@/components/pwa/disable-zoom";
 import { ServiceWorkerRegistrar } from "@/components/pwa/service-worker-registrar";
 import { Toaster } from "@/components/ui/sonner";
 
@@ -31,6 +32,9 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
+  // Richiesta di prodotto: nessuno zoom, comportamento da app nativa.
+  maximumScale: 1,
+  userScalable: false,
   viewportFit: "cover",
   themeColor: "#FAF6F0",
   colorScheme: "light",
@@ -45,6 +49,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           {children}
           <Toaster position="top-center" offset={{ top: "calc(env(safe-area-inset-top, 0px) + 12px)" }} />
           <ServiceWorkerRegistrar />
+          <DisableZoom />
         </Providers>
       </body>
     </html>
