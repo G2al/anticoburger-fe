@@ -145,3 +145,23 @@ Limiti noti:
 4. Nel backend: `CORS_ALLOWED_ORIGINS=https://app.anticoburger.it`.
 5. `/sw.js` deve essere servito senza cache (già impostato in `next.config.ts` con `headers()`; se c'è una
    CDN davanti, deve rispettare `Cache-Control: no-cache`).
+
+### Plesk (Node.js / Passenger)
+
+| Impostazione | Valore |
+|---|---|
+| Application Root | cartella del progetto (es. `/httpdocs`) |
+| Application Startup File | `server.js` |
+| Application Mode | `production` |
+| Node.js Version | ≥ 20.9 (consigliata 24) |
+| Custom environment variables | `NEXT_PUBLIC_API_BASE_URL=https://admin.anticoburger.it/api/v1` |
+
+Procedura (a ogni aggiornamento del codice):
+1. **NPM install**.
+2. **Run script** → `build`. La variabile `NEXT_PUBLIC_API_BASE_URL` deve essere già impostata, perché viene
+   incorporata nel bundle durante la build.
+3. **Restart App**.
+
+`server.js` avvia Next.js in produzione sulla porta indicata da Passenger. Le dipendenze necessarie alla
+build (Tailwind, TypeScript) sono in `dependencies`, così la build funziona anche quando Plesk installa
+senza devDependencies.
