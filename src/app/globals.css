@@ -1,26 +1,131 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+/* Tema unico chiaro: il brand è pensato su fondo crema/bianco. */
+@custom-variant dark (&:is(.dark *));
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+  --font-heading: var(--font-sans);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-brass: var(--brass);
+  --color-brass-foreground: var(--brass-foreground);
+  --color-success: var(--success);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+/*
+ * Palette Antico Burger (contrasti WCAG verificati su --background):
+ * foreground 16.4:1 · muted-foreground 5.7:1 · primary 15.5:1 · brass-foreground 5.3:1 · destructive 6.1:1
+ * --primary è il colore esatto del logo ufficiale (#311713).
+ * --brass (3.6:1) è solo decorativo: mai per testo.
+ */
+:root {
+  color-scheme: light;
+
+  --background: oklch(0.975 0.009 78.3); /* crema   #FAF6F0 */
+  --foreground: oklch(0.213 0.014 41.6); /* #1F1714 */
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.213 0.014 41.6);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.213 0.014 41.6);
+  --primary: oklch(0.241 0.043 29.8); /* bordeaux #311713 */
+  --primary-foreground: oklch(0.978 0.009 78.3);
+  --secondary: oklch(0.945 0.014 78.3); /* #F2ECE3 */
+  --secondary-foreground: oklch(0.241 0.043 29.8);
+  --muted: oklch(0.945 0.014 78.3);
+  --muted-foreground: oklch(0.495 0.02 55.9); /* #6B5F57 */
+  --accent: oklch(0.934 0.023 82.1); /* #F1E8D8 */
+  --accent-foreground: oklch(0.402 0.057 76.1); /* #5A4423 */
+  --brass: oklch(0.605 0.083 79.7); /* ottone #9C7C45 */
+  --brass-foreground: oklch(0.512 0.07 79.4); /* #7C6236 */
+  --success: oklch(0.47 0.09 150);
+  --destructive: oklch(0.5 0.182 29.5); /* #B42318 */
+  --border: oklch(0.898 0.019 75.3); /* #E5DCD0 */
+  --input: oklch(0.928 0.015 77.1); /* #EDE6DC */
+  --ring: oklch(0.487 0.091 29.8); /* #8C4A40 */
+  --radius: 0.75rem;
+
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  html {
+    @apply font-sans;
+    -webkit-text-size-adjust: 100%;
+    -webkit-tap-highlight-color: transparent;
+    overscroll-behavior-y: none;
+    scrollbar-gutter: stable;
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
+    overflow-x: clip;
+  }
+  h1,
+  h2,
+  h3 {
+    @apply tracking-tight text-balance;
+  }
+  /* Nessuno zoom automatico su iOS: input sempre ≥ 16px. */
+  input,
+  textarea,
+  select {
+    font-size: max(16px, 1rem);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@utility tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+@utility pb-safe {
+  padding-bottom: max(var(--safe-bottom), 1rem);
+}
+
+@utility pt-safe {
+  padding-top: var(--safe-top);
+}
+
+@utility px-safe {
+  padding-left: max(var(--safe-left), 1.25rem);
+  padding-right: max(var(--safe-right), 1.25rem);
 }
