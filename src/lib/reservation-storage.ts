@@ -84,8 +84,15 @@ export function updateStoredStatus(reference: string, status: ReservationStatus)
   persist(list.map((item) => (item.reference === reference ? { ...item, status } : item)));
 }
 
+/** Toglie la voce solo da questo dispositivo: la prenotazione sul server non cambia. */
 export function removeStoredReservation(reference: string): void {
   persist(listStoredReservations().filter((item) => item.reference !== reference));
+}
+
+/** Rimette una voce rimossa (es. "Annulla" dopo una rimozione dall'elenco). */
+export function restoreStoredReservation(entry: StoredReservation): void {
+  const others = listStoredReservations().filter((item) => item.reference !== entry.reference);
+  persist([...others, entry]);
 }
 
 export function removePastReservations(now: Date = new Date()): void {

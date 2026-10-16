@@ -3,35 +3,24 @@
 import { CalendarSearch, Link2Off, SearchX } from "lucide-react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useState, type ReactNode } from "react";
+import { toast } from "sonner";
 import { ContactRestaurant } from "@/components/common/contact-restaurant";
 import { ErrorState, OfflineState } from "@/components/common/error-state";
 import { Notice } from "@/components/common/notice";
 import { BottomActionBar } from "@/components/layout/bottom-action-bar";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useHydrated } from "@/hooks/use-hydrated";
 import { useOnlineStatus } from "@/hooks/use-online-status";
 import { useReservation } from "@/hooks/use-reservation";
+import { useStoredReservations } from "@/hooks/use-stored-reservations";
 import { describeError, isApiError } from "@/lib/api/errors";
 import { isPast } from "@/lib/date";
 import { buildLocalManageHref, parseManageHash } from "@/lib/manage-link";
-import {
-  findStoredReservation,
-  removeStoredReservation,
-  saveReservation,
-} from "@/lib/reservation-storage";
+import { findStoredReservation, saveReservation } from "@/lib/reservation-storage";
+import { RemoveFromDeviceButton } from "./remove-from-device-button";
 import { ReservationDetails } from "./reservation-details";
 
 const CancelReservationDialog = dynamic(() => import("./cancel-reservation-dialog"));
@@ -92,8 +81,10 @@ function ReservationManagerClient() {
 }
 
 function LoadedReservation({ reference, token }: { reference: string; token: string }) {
+  const router = useRouter();
   const online = useOnlineStatus();
   const query = useReservation(reference, token);
+  const storedOnDevice = useStoredReservations().some((item) => item.reference === reference);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [alreadyCancelledNotice, setAlreadyCancelledNotice] = useState(false);
   const [now] = useState(() => new Date());
@@ -160,10 +151,28 @@ function LoadedReservation({ reference, token }: { reference: string; token: str
         </>
       )}
 
-      {cancelled && (
-        <Link href="/prenota" className={buttonVariants({ size: "xl" })}>
-          Prenota di nuovo
-        </Link>
+      {(cancelled || past) && (
+        <div className="flex flex-col gap-2">
+          {cancelled && (
+            <Link href="/prenota" className={buttonVariants({ size: "xl" })}>
+              Prenota di nuovo
+            </Link>
+          )}
+          {storedOnDevice && (
+            <RemoveFromDeviceButton
+              reference={reference}
+              description={
+                cancelled
+                  ? "La prenotazione resta annullata presso il ristorante: verrà solo tolta dall'elenco di questo dispositivo."
+                  : "La prenotazione verrà solo tolta dall'elenco di questo dispositivo."
+              }
+              onRemoved={() => {
+                toast.success("Rimossa da questo dispositivo");
+                router.push("/prenotazioni");
+              }}
+            />
+          )}
+        </div>
       )}
     </>
   );
@@ -176,31 +185,11 @@ function NotFoundState({ reference, message }: { reference: string; message: str
     <EmptyState icon={<SearchX className="size-7 text-brass" aria-hidden />} title="Prenotazione non trovata" message={message}>
       <ContactRestaurant compact className="items-center" />
       {stored && (
-        <AlertDialog>
-          <AlertDialogTrigger render={<Button variant="ghost" size="lg" />}>
-            Rimuovi da questo dispositivo
-          </AlertDialogTrigger>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Rimuovere da questo dispositivo?</AlertDialogTitle>
-              <AlertDialogDescription>
-                La prenotazione verrà tolta dall&apos;elenco salvato su questo dispositivo. Non verrà annullata.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel size="lg">Mantieni</AlertDialogCancel>
-              <AlertDialogAction
-                size="lg"
-                onClick={() => {
-                  removeStoredReservation(reference);
-                  setStored(false);
-                }}
-              >
-                Rimuovi
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
+        <RemoveFromDeviceButton
+          reference={reference}
+          description="La prenotazione verrà tolta dall'elenco salvato su questo dispositivo. Non verrà annullata."
+          onRemoved={() => setStored(false)}
+        />
       )}
     </EmptyState>
   );

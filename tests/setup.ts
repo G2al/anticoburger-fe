@@ -18,6 +18,10 @@ MotionGlobalConfig.skipAnimations = true;
 // API del browser assenti in jsdom.
 window.scrollTo = () => {};
 Element.prototype.scrollIntoView = () => {};
+// Usati da sonner al tocco del toast.
+Element.prototype.setPointerCapture ??= () => {};
+Element.prototype.releasePointerCapture ??= () => {};
+Element.prototype.hasPointerCapture ??= () => false;
 window.matchMedia ??= (query: string) =>
   ({
     matches: false,

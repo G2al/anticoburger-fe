@@ -80,7 +80,7 @@ src/
     phone.ts           normalizzazione del telefono identica al backend
     validation.ts      schemi Zod dei form
     reservation-storage.ts  archivio locale (localStorage, chiave ab:reservations:v1)
-  config/restaurant.ts dati statici del ristorante (SEGNAPOSTO da sostituire)
+  config/restaurant.ts dati statici del ristorante: indirizzo, telefono, link Google Maps, orari
 public/sw.js           service worker
 scripts/generate-icons.mjs
 tests/                 unit/component test e mock MSW
@@ -137,7 +137,7 @@ Limiti noti:
 
 ## Deploy su `https://app.anticoburger.it`
 
-1. Sostituire i segnaposto in `src/config/restaurant.ts` e impostare `isPlaceholder: false`.
+1. Verificare i dati in `src/config/restaurant.ts` (gli orari indicativi sono ancora da confermare).
 2. Impostare `NEXT_PUBLIC_API_BASE_URL=https://admin.anticoburger.it/api/v1` (e, se si vuole,
    `APP_VERSION` con il commit) **prima** di `npm run build`.
 3. `npm ci && npm run build && npm run start` (Node 24), oppure qualsiasi piattaforma che supporti Next.js 16.

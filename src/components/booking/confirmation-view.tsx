@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { ContactRestaurant } from "@/components/common/contact-restaurant";
+import { RestaurantMap } from "@/components/common/restaurant-map";
 import { BottomActionBar } from "@/components/layout/bottom-action-bar";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { formatLongDate, formatTimeOfInstant, pluralizePeople } from "@/lib/date";
@@ -152,6 +153,8 @@ export function ConfirmationView({
             <ContactRestaurant compact />
           </div>
         </div>
+
+        <RestaurantMap />
       </div>
 
       <BottomActionBar>

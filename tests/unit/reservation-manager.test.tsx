@@ -58,6 +58,26 @@ describe("Gestione prenotazione", () => {
     expect(findStoredReservation(REFERENCE)?.status).toBe("cancelled");
   });
 
+  it("dopo l'annullamento si può togliere dal dispositivo, con conferma", async () => {
+    seed({ status: "cancelled", cancelled_at: "2026-10-16T09:00:00+02:00" });
+    window.location.hash = `#ref=${REFERENCE}&token=${TOKEN}`;
+    const { user } = renderWithProviders(<ReservationManager />);
+
+    await user.click(await screen.findByRole("button", { name: "Rimuovi da questo dispositivo" }));
+    expect(screen.getByText(/resta annullata presso il ristorante/)).toBeInTheDocument();
+    expect(findStoredReservation(REFERENCE)).toBeDefined();
+    await user.click(screen.getByRole("button", { name: "Rimuovi" }));
+    expect(findStoredReservation(REFERENCE)).toBeUndefined();
+  });
+
+  it("una prenotazione confermata futura non offre la rimozione", async () => {
+    seed();
+    window.location.hash = `#ref=${REFERENCE}&token=${TOKEN}`;
+    renderWithProviders(<ReservationManager />);
+    expect(await screen.findByRole("button", { name: "Annulla prenotazione" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Rimuovi da questo dispositivo" })).not.toBeInTheDocument();
+  });
+
   it("prenotazione già annullata: nessun pulsante di annullamento", async () => {
     seed({ status: "cancelled", cancelled_at: "2026-10-16T09:00:00+02:00" });
     window.location.hash = `#ref=${REFERENCE}&token=${TOKEN}`;

@@ -185,6 +185,14 @@ describe("Conferma", () => {
     expect(screen.getByText("0AFD8AF6")).toBeInTheDocument();
     expect(screen.getByText("Fine prevista alle 21:00")).toBeInTheDocument();
 
+    // "Dove ci troviamo": mappa e collegamenti a Google Maps.
+    expect(screen.getByTitle(/^Mappa: Antico Burger/)).toHaveAttribute("src", expect.stringContaining("output=embed"));
+    expect(screen.getByRole("link", { name: "Indicazioni stradali" })).toHaveAttribute(
+      "href",
+      expect.stringContaining("google.com/maps/dir/"),
+    );
+    expect(screen.getByRole("link", { name: "Apri in Google Maps" })).toHaveAttribute("target", "_blank");
+
     const stored = JSON.parse(localStorage.getItem(STORAGE_KEY)!);
     expect(stored[0]).toMatchObject({ date: "2026-10-20", time: "20:00", party_size: 2, first_name: "Mario" });
     expect(stored[0].token).toHaveLength(48);
