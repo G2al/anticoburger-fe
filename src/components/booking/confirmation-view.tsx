@@ -1,6 +1,6 @@
 "use client";
 
-import { CalendarPlus, Copy, Share2, TriangleAlert } from "lucide-react";
+import { BellRing, CalendarPlus, Copy, Share2 } from "lucide-react";
 import { m } from "motion/react";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
@@ -141,9 +141,14 @@ export function ConfirmationView({
           )}
         </div>
 
-        <div className="flex gap-3 rounded-3xl bg-accent px-4 py-4 text-sm text-accent-foreground">
-          <TriangleAlert className="mt-0.5 size-4 shrink-0" aria-hidden />
-          <div className="flex flex-col gap-2">
+        <RestaurantMap />
+
+        {/* Promemoria finale in stile notifica: informativo, non un avviso di pericolo. */}
+        <div role="note" className="flex gap-3 rounded-3xl bg-accent px-4 py-4 text-sm text-accent-foreground">
+          <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-card shadow-sm ring-1 ring-brass/30">
+            <BellRing className="size-4 text-brass" aria-hidden />
+          </span>
+          <div className="flex flex-col gap-2 pt-1">
             <p>
               {persisted
                 ? "La prenotazione è salvata su questo dispositivo. "
@@ -153,8 +158,6 @@ export function ConfirmationView({
             <ContactRestaurant compact />
           </div>
         </div>
-
-        <RestaurantMap />
       </div>
 
       <BottomActionBar>
