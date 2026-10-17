@@ -1,6 +1,6 @@
 import { screen, within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
-import { MyReservations } from "@/components/reservation/my-reservations";
+import { MyReservations, NextReservationCard } from "@/components/reservation/my-reservations";
 import { Toaster } from "@/components/ui/sonner";
 import type { Reservation } from "@/lib/api/types";
 import { findStoredReservation, saveReservation } from "@/lib/reservation-storage";
@@ -63,5 +63,23 @@ describe("Le mie prenotazioni", () => {
     await user.click(screen.getByRole("button", { name: "Annulla" }));
     expect(findStoredReservation("annullata")?.token).toBe("token-annullata");
     expect(await screen.findByRole("region", { name: "Annullate" })).toBeInTheDocument();
+  });
+});
+
+describe("Prossima prenotazione in home", () => {
+  it("non mostra nulla senza prenotazioni confermate future", () => {
+    store("annullata", { status: "cancelled" });
+    const { container } = renderWithProviders(<NextReservationCard />);
+    expect(container).toBeEmptyDOMElement();
+  });
+
+  it("mostra la più vicina e il link all'elenco se ce ne sono altre", async () => {
+    store("dopo", { date: "2026-10-24", time: "19:30" });
+    store("prima", { date: "2026-10-20", time: "20:30" });
+    renderWithProviders(<NextReservationCard />);
+    const card = await screen.findByRole("link", { name: /La tua prossima prenotazione/ });
+    expect(card).toHaveTextContent("Martedì 20 ottobre");
+    expect(card).toHaveAttribute("href", "/prenotazione#ref=prima");
+    expect(screen.getByRole("link", { name: "Vedi tutte le prenotazioni (2)" })).toHaveAttribute("href", "/prenotazioni");
   });
 });

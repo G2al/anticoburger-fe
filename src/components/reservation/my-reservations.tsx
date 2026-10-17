@@ -164,26 +164,46 @@ function ListSkeleton() {
   );
 }
 
-/** Link "Le mie prenotazioni" in home, visibile solo se ci sono prenotazioni future sul dispositivo. */
-export function MyReservationsShortcut() {
+/** Home: la prossima prenotazione confermata salvata sul dispositivo, se c'è. */
+export function NextReservationCard() {
   const hydrated = useHydrated();
-  return hydrated ? <MyReservationsShortcutClient /> : null;
+  return hydrated ? <NextReservationCardClient /> : null;
 }
 
-function MyReservationsShortcutClient() {
+function NextReservationCardClient() {
   const reservations = useStoredReservations();
   const [now] = useState(() => new Date());
   const upcoming = reservations.filter((item) => item.status === "confirmed" && !isPast(item.date, item.time, now));
-  if (upcoming.length === 0) return null;
+  const next = upcoming[0];
+  if (!next) return null;
 
   return (
-    <m.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }}>
-      <Link href="/prenotazioni" className={buttonVariants({ variant: "outline", size: "xl" })}>
-        Le mie prenotazioni
-        <span className="rounded-full bg-primary px-2 py-0.5 text-xs text-primary-foreground tabular">
-          {upcoming.length}
+    <m.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col gap-2">
+      {/* <a>: la pagina di gestione legge il frammento al caricamento. */}
+      <a
+        href={buildLocalManageHref(next.reference)}
+        className="flex items-center gap-4 rounded-3xl bg-primary px-5 py-4 text-primary-foreground shadow-md transition-transform outline-none focus-visible:ring-3 focus-visible:ring-ring/40 active:scale-[0.99]"
+      >
+        <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary-foreground/10">
+          <CalendarDays className="size-5" aria-hidden />
         </span>
-      </Link>
+        <span className="flex flex-1 flex-col gap-0.5">
+          <span className="text-xs font-medium tracking-wide uppercase opacity-75">La tua prossima prenotazione</span>
+          <span className="font-semibold">{formatLongDate(next.date)}</span>
+          <span className="text-sm opacity-80 tabular">
+            Ore {next.time} · {pluralizePeople(next.party_size)}
+          </span>
+        </span>
+        <ChevronRight className="size-5 opacity-75" aria-hidden />
+      </a>
+      {upcoming.length > 1 && (
+        <Link
+          href="/prenotazioni"
+          className="self-center rounded-lg px-2 py-2 text-sm font-medium text-ring underline-offset-4 outline-none hover:underline focus-visible:ring-3 focus-visible:ring-ring/30"
+        >
+          Vedi tutte le prenotazioni ({upcoming.length})
+        </Link>
+      )}
     </m.div>
   );
 }

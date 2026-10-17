@@ -5,7 +5,7 @@ import { AppShell } from "@/components/layout/app-shell";
 import { BottomActionBar } from "@/components/layout/bottom-action-bar";
 import { Wordmark } from "@/components/layout/wordmark";
 import { InstallPromptLoader } from "@/components/pwa/install-prompt-loader";
-import { MyReservationsShortcut } from "@/components/reservation/my-reservations";
+import { NextReservationCard } from "@/components/reservation/my-reservations";
 import { buttonVariants } from "@/components/ui/button";
 import { restaurant } from "@/config/restaurant";
 
@@ -13,7 +13,8 @@ export default function HomePage() {
   return (
     <AppShell>
       <main className="flex flex-1 flex-col">
-        <div className="flex flex-1 flex-col gap-10 px-safe pt-14 pb-6 sm:px-8 sm:pt-16">
+        {/* Gruppo centrato in verticale: sugli schermi alti lo spazio libero si divide sopra e sotto. */}
+        <div className="flex flex-1 flex-col justify-center gap-10 px-safe py-10 sm:px-8 sm:py-12">
           <div className="flex flex-col items-center gap-8 text-center">
             <Wordmark width={232} priority />
             <div className="flex items-center gap-3 text-brass" aria-hidden>
@@ -29,9 +30,11 @@ export default function HomePage() {
             </div>
           </div>
 
+          <NextReservationCard />
+
           <InstallPromptLoader />
 
-          <section aria-labelledby="info-title" className="mt-auto flex flex-col gap-4 rounded-3xl bg-card p-5 ring-1 ring-border sm:bg-muted/50 sm:ring-0">
+          <section aria-labelledby="info-title" className="flex flex-col gap-4 rounded-3xl bg-card p-5 ring-1 ring-border sm:bg-muted/50 sm:ring-0">
             <h2 id="info-title" className="text-sm font-medium tracking-wide text-muted-foreground uppercase">
               {restaurant.name}
             </h2>
@@ -51,7 +54,6 @@ export default function HomePage() {
         </div>
 
         <BottomActionBar>
-          <MyReservationsShortcut />
           <Link href="/prenota" className={buttonVariants({ size: "xl" })}>
             Prenota un tavolo
             <ArrowRight aria-hidden data-icon="inline-end" />
