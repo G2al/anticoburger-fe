@@ -17,6 +17,15 @@ export const restaurant = {
     /** Avvia le indicazioni stradali dalla posizione dell'utente. */
     directionsUrl: `https://www.google.com/maps/dir/?api=1&destination=${mapsQuery}`,
   },
+  /** Oltre questo numero di persone si prenota solo per telefono (regola del locale, non del backend). */
+  maxOnlinePartySize: 10,
+  /** Regole di arrivo mostrate dopo la prenotazione. */
+  arrival: {
+    /** Ritardo massimo tollerato. */
+    maxDelayMinutes: 15,
+    /** Possibile attesa all'arrivo, non garantita né sistematica. */
+    possibleWaitMinutes: 15,
+  },
   /** ⚠️ SEGNAPOSTO: orari indicativi da confermare, non usati per calcolare la disponibilità. */
   openingHours: [
     { days: "Martedì – Domenica", hours: "19:00 – 23:30" },

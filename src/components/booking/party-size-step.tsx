@@ -1,13 +1,15 @@
 "use client";
 
-import { ArrowRight, Users } from "lucide-react";
+import { ArrowRight, Phone, Users } from "lucide-react";
 import { m } from "motion/react";
 import type { ReactNode } from "react";
 import { ContactRestaurant } from "@/components/common/contact-restaurant";
 import { ErrorState, OfflineState } from "@/components/common/error-state";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { restaurant } from "@/config/restaurant";
 import { useBookingSettings } from "@/hooks/use-booking-settings";
+import { onlinePartySizes } from "@/lib/party-size";
 import { SelectableChip } from "./selectable-chip";
 import { StepHeader } from "./step-header";
 import { StepLayout } from "./step-layout";
@@ -31,7 +33,7 @@ export function PartySizeStep({
   focusTitle: boolean;
 }) {
   const settings = useBookingSettings();
-  const sizes = settings.data?.party_sizes;
+  const sizes = settings.data ? onlinePartySizes(settings.data.party_sizes) : undefined;
   const validSelection = selected !== null && sizes?.includes(selected) ? selected : null;
 
   const header = (
@@ -71,28 +73,31 @@ export function PartySizeStep({
       }
     >
       {sizes ? (
-        <m.div
-          role="group"
-          aria-label="Numero di persone"
-          className="grid grid-cols-4 gap-2.5"
-          variants={listVariants}
-          initial="hidden"
-          animate="show"
-        >
-          {sizes.map((size) => (
-            <m.div key={size} variants={itemVariants}>
-              <SelectableChip
-                selected={validSelection === size}
-                indicatorId="party-indicator"
-                onClick={() => onSelect(size)}
-                aria-label={size === 1 ? "1 persona" : `${size} persone`}
-                className="h-16 w-full text-xl"
-              >
-                {size}
-              </SelectableChip>
-            </m.div>
-          ))}
-        </m.div>
+        <>
+          <m.div
+            role="group"
+            aria-label="Numero di persone"
+            className="grid grid-cols-4 gap-2.5"
+            variants={listVariants}
+            initial="hidden"
+            animate="show"
+          >
+            {sizes.map((size) => (
+              <m.div key={size} variants={itemVariants}>
+                <SelectableChip
+                  selected={validSelection === size}
+                  indicatorId="party-indicator"
+                  onClick={() => onSelect(size)}
+                  aria-label={size === 1 ? "1 persona" : `${size} persone`}
+                  className="h-16 w-full text-xl"
+                >
+                  {size}
+                </SelectableChip>
+              </m.div>
+            ))}
+          </m.div>
+          <LargeGroupNotice maxOnline={Math.max(...sizes)} />
+        </>
       ) : settings.isPending && settings.fetchStatus === "paused" ? (
         <OfflineState />
       ) : settings.isError ? (
@@ -101,6 +106,33 @@ export function PartySizeStep({
         <PartySizeSkeleton />
       )}
     </StepLayout>
+  );
+}
+
+/** Gruppi oltre il limite online: si prenota solo chiamando il locale. */
+function LargeGroupNotice({ maxOnline }: { maxOnline: number }) {
+  return (
+    <m.div
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="flex flex-col gap-3 rounded-3xl bg-card p-4 ring-1 ring-border"
+    >
+      <div className="flex gap-3">
+        <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-accent">
+          <Users className="size-4 text-accent-foreground" aria-hidden />
+        </span>
+        <div className="flex flex-col gap-0.5">
+          <p className="font-semibold">Siete più di {maxOnline} persone?</p>
+          <p className="text-sm text-pretty text-muted-foreground">
+            Per i gruppi numerosi la prenotazione si fa solo per telefono: chiamaci e organizziamo il tavolo insieme.
+          </p>
+        </div>
+      </div>
+      <a href={restaurant.phoneHref} className={buttonVariants({ variant: "outline", size: "lg" })}>
+        <Phone aria-hidden data-icon="inline-start" />
+        Chiama {restaurant.phoneDisplay}
+      </a>
+    </m.div>
   );
 }
 

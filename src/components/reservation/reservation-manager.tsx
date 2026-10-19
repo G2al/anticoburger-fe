@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, type ReactNode } from "react";
 import { toast } from "sonner";
+import { ArrivalNotice } from "@/components/common/arrival-notice";
 import { ContactRestaurant } from "@/components/common/contact-restaurant";
 import { ErrorState, OfflineState } from "@/components/common/error-state";
 import { Notice } from "@/components/common/notice";
@@ -122,6 +123,7 @@ function LoadedReservation({ reference, token }: { reference: string; token: str
         </Notice>
       )}
       <ReservationDetails reservation={reservation} past={past} />
+      {!cancelled && !past && <ArrivalNotice />}
 
       {!cancelled && !past && (
         <>

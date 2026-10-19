@@ -13,6 +13,7 @@ import { useHydrated } from "@/hooks/use-hydrated";
 import { isApiError } from "@/lib/api/errors";
 import type { CreatedReservation } from "@/lib/api/types";
 import { currentMonthInRome, monthOf } from "@/lib/date";
+import { onlinePartySizes } from "@/lib/party-size";
 import { findStoredReservation, saveReservation } from "@/lib/reservation-storage";
 import type { GuestDetails } from "@/lib/guest-details";
 import { INITIAL_DRAFT, loadDraft, saveDraft, stepIndex, type BookingDraft, type FormStep, type Step } from "./booking-draft";
@@ -70,7 +71,7 @@ function BookingFlowClient() {
   const availability = useAvailability(checkSlots ? draft.date : null, draft.partySize);
 
   if (revalidating) {
-    const sizes = settings.data?.party_sizes;
+    const sizes = settings.data ? onlinePartySizes(settings.data.party_sizes) : undefined;
     if (settings.isError || settings.fetchStatus === "paused") {
       setRevalidating(false);
     } else if (sizes) {

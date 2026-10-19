@@ -49,6 +49,19 @@ describe("Step persone", () => {
     expect(screen.getByRole("button", { name: "Continua" })).toBeDisabled();
   });
 
+  it("oltre 10 persone non si prenota online: invito a chiamare", async () => {
+    server.use(
+      http.get(`${API}/booking-settings`, () =>
+        HttpResponse.json({ data: { ...settings, max_party_size: 12, party_sizes: [2, 4, 10, 12] } }),
+      ),
+    );
+    renderWithProviders(<BookingFlow />);
+    const group = await screen.findByRole("group", { name: "Numero di persone" });
+    expect(within(group).getAllByRole("button").map((button) => button.textContent)).toEqual(["2", "4", "10"]);
+    expect(screen.getByText("Siete più di 10 persone?")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Chiama +39 376 253 7179" })).toHaveAttribute("href", "tel:+393762537179");
+  });
+
   it("mostra lo skeleton durante il caricamento", async () => {
     server.use(
       http.get(`${API}/booking-settings`, async () => {
@@ -184,6 +197,11 @@ describe("Conferma", () => {
     expect(posts.count).toBe(1);
     expect(screen.getByText("0AFD8AF6")).toBeInTheDocument();
     expect(screen.getByText("Fine prevista alle 21:00")).toBeInTheDocument();
+
+    // Nota bene sull'arrivo.
+    const arrival = screen.getByRole("region", { name: "Nota bene" });
+    expect(arrival).toHaveTextContent("ritardo massimo di 15 minuti");
+    expect(arrival).toHaveTextContent("attesa fino a 15 minuti");
 
     // "Dove ci troviamo": mappa e collegamenti a Google Maps.
     expect(screen.getByTitle(/^Mappa: Antico Burger/)).toHaveAttribute("src", expect.stringContaining("output=embed"));
@@ -345,6 +363,18 @@ describe("Ripristino dopo reload", () => {
     renderWithProviders(<BookingFlow />);
     expect(await screen.findByRole("heading", { name: "Scegli l'orario" })).toBeInTheDocument();
     expect(screen.getByText("L'orario scelto non è più disponibile: scegline un altro.")).toBeInTheDocument();
+  });
+
+  it("una bozza con più di 10 persone torna allo step persone", async () => {
+    server.use(
+      http.get(`${API}/booking-settings`, () =>
+        HttpResponse.json({ data: { ...settings, max_party_size: 12, party_sizes: [2, 4, 12] } }),
+      ),
+    );
+    draft({ partySize: 12 });
+    renderWithProviders(<BookingFlow />);
+    expect(await screen.findByRole("heading", { name: "Quante persone?" })).toBeInTheDocument();
+    expect(screen.getByText(/numero di persone scelto non è più disponibile/)).toBeInTheDocument();
   });
 
   it("se il numero di persone non è più accettato torna allo step persone", async () => {

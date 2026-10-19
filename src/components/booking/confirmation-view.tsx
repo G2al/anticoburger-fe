@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { ContactRestaurant } from "@/components/common/contact-restaurant";
+import { ArrivalNotice } from "@/components/common/arrival-notice";
 import { RestaurantMap } from "@/components/common/restaurant-map";
 import { BottomActionBar } from "@/components/layout/bottom-action-bar";
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -102,6 +103,8 @@ export function ConfirmationView({
           <SummaryRow label="Persone" value={pluralizePeople(booking.party_size)} />
           <SummaryRow label="Riferimento" value={shortReference(booking.reference)} mono />
         </m.dl>
+
+        <ArrivalNotice />
 
         <div className="flex flex-col gap-3">
           <h2 className="font-semibold">Link di gestione</h2>
