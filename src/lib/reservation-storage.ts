@@ -78,6 +78,28 @@ export function saveReservation(reservation: Reservation, token: string): boolea
   return persist([...others, entry]);
 }
 
+/**
+ * Allinea la copia locale ai dati del backend (il ristorante può aver cambiato data, ora, persone o stato).
+ * Scrive solo se qualcosa è cambiato: il token e la data di salvataggio restano quelli originali.
+ */
+export function syncStoredReservation(reservation: Reservation): void {
+  const list = listStoredReservations();
+  const current = list.find((item) => item.reference === reservation.reference);
+  if (!current) return;
+  const updated: StoredReservation = {
+    ...current,
+    date: reservation.date,
+    time: reservation.time,
+    party_size: reservation.party_size,
+    first_name: reservation.first_name,
+    status: reservation.status,
+    starts_at: reservation.starts_at,
+    ends_at: reservation.ends_at,
+  };
+  const changed = (Object.keys(updated) as (keyof StoredReservation)[]).some((key) => updated[key] !== current[key]);
+  if (changed) persist(list.map((item) => (item.reference === reservation.reference ? updated : item)));
+}
+
 export function updateStoredStatus(reference: string, status: ReservationStatus): void {
   const list = listStoredReservations();
   if (!list.some((item) => item.reference === reference)) return;

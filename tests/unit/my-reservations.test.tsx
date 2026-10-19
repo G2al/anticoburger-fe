@@ -4,28 +4,30 @@ import { MyReservations, NextReservationCard } from "@/components/reservation/my
 import { Toaster } from "@/components/ui/sonner";
 import type { Reservation } from "@/lib/api/types";
 import { findStoredReservation, saveReservation } from "@/lib/reservation-storage";
+import { db } from "../msw/handlers";
 import { renderWithProviders } from "../render";
 
+/** Salva la prenotazione sul dispositivo e nel backend simulato (la sincronizzazione la ritrova). */
 function store(reference: string, overrides: Partial<Reservation> = {}) {
-  saveReservation(
-    {
-      reference,
-      status: "confirmed",
-      date: "2026-10-20",
-      time: "20:30",
-      party_size: 2,
-      starts_at: "2026-10-20T20:30:00+02:00",
-      ends_at: "2026-10-20T21:30:00+02:00",
-      first_name: "Mario",
-      last_name: "Rossi",
-      phone: "333 123 4567",
-      email: null,
-      notes: null,
-      cancelled_at: null,
-      ...overrides,
-    },
-    `token-${reference}`,
-  );
+  const reservation: Reservation = {
+    reference,
+    status: "confirmed",
+    date: "2026-10-20",
+    time: "20:30",
+    party_size: 2,
+    starts_at: "2026-10-20T20:30:00+02:00",
+    ends_at: "2026-10-20T21:30:00+02:00",
+    first_name: "Mario",
+    last_name: "Rossi",
+    phone: "333 123 4567",
+    email: null,
+    notes: null,
+    cancelled_at: null,
+    ...overrides,
+  };
+  const token = `token-${reference}`;
+  saveReservation(reservation, token);
+  db.reservations.set(reference, { reservation, token });
 }
 
 describe("Le mie prenotazioni", () => {

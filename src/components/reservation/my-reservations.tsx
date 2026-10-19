@@ -9,6 +9,7 @@ import { Button, buttonVariants } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useHydrated } from "@/hooks/use-hydrated";
 import { useStoredReservations } from "@/hooks/use-stored-reservations";
+import { useSyncStoredReservations } from "@/hooks/use-sync-stored-reservations";
 import { formatLongDate, isPast, pluralizePeople } from "@/lib/date";
 import { buildLocalManageHref } from "@/lib/manage-link";
 import {
@@ -30,6 +31,8 @@ const itemVariants = { hidden: { opacity: 0, y: 8 }, show: { opacity: 1, y: 0 } 
 function MyReservationsClient() {
   const reservations = useStoredReservations();
   const [now] = useState(() => new Date());
+  // Mostra subito la copia locale e la allinea al backend in background.
+  useSyncStoredReservations(reservations, now);
   const future = reservations.filter((item) => !isPast(item.date, item.time, now));
   const upcoming = future.filter((item) => item.status === "confirmed");
   const cancelled = future.filter((item) => item.status === "cancelled");
@@ -173,6 +176,8 @@ export function NextReservationCard() {
 function NextReservationCardClient() {
   const reservations = useStoredReservations();
   const [now] = useState(() => new Date());
+  // Mostra subito la copia locale e la allinea al backend in background.
+  useSyncStoredReservations(reservations, now);
   const upcoming = reservations.filter((item) => item.status === "confirmed" && !isPast(item.date, item.time, now));
   const next = upcoming[0];
   if (!next) return null;
