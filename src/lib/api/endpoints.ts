@@ -5,6 +5,7 @@ import type {
   Calendar,
   CreatedReservation,
   CreateReservationInput,
+  MenuCategory,
   Reservation,
 } from "./types";
 
@@ -36,4 +37,8 @@ export function cancelReservation(reference: string, token: string) {
     method: "POST",
     token,
   });
+}
+
+export function getMenu(signal?: AbortSignal) {
+  return apiRequest<MenuCategory[]>("/menu", { signal });
 }

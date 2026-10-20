@@ -1,7 +1,7 @@
 import { http, HttpResponse } from "msw";
 import type { CreatedReservation, CreateReservationInput, Reservation } from "@/lib/api/types";
 import { normalizePhone } from "@/lib/phone";
-import { API, calendarFor, DEFAULT_SLOTS, settings } from "./fixtures";
+import { API, calendarFor, DEFAULT_SLOTS, menuFixture, settings } from "./fixtures";
 
 // Simulazione del backend fedele al contratto (FRONTEND_HANDOFF.md): stesse forme e stessi codici.
 
@@ -32,6 +32,10 @@ function endsAt(date: string, time: string) {
 
 export const handlers = [
   http.get(`${API}/booking-settings`, () => HttpResponse.json({ data: settings })),
+
+  http.get(`${API}/menu`, () =>
+    HttpResponse.json({ data: menuFixture }, { headers: { "Cache-Control": "public, max-age=60" } }),
+  ),
 
   http.get(`${API}/calendar`, ({ request }) => {
     const url = new URL(request.url);

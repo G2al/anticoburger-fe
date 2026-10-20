@@ -1,4 +1,4 @@
-import type { BookingSettings, Calendar, CalendarDayStatus } from "@/lib/api/types";
+import type { BookingSettings, Calendar, CalendarDayStatus, MenuCategory } from "@/lib/api/types";
 
 export const API = "http://api.test/api/v1";
 
@@ -34,3 +34,35 @@ function statusFor(date: string): CalendarDayStatus {
 }
 
 export const DEFAULT_SLOTS = ["12:30", "13:00", "19:00", "19:30", "20:00", "20:30", "21:00"];
+
+/** Menu come lo restituisce GET /menu: categorie nell'ordine dell'admin (non alfabetico), prodotti in ordine alfabetico. */
+export const menuFixture: MenuCategory[] = [
+  {
+    id: 2,
+    name: "Panini",
+    items: [
+      {
+        id: 7,
+        name: "Antico Burger",
+        price: "14.90",
+        ingredients: "Pane brioche, manzo 200 g, cheddar, bacon",
+        is_special: true,
+        image_url: "http://127.0.0.1:8000/storage/menu/abc123.png",
+      },
+      { id: 9, name: "Classic Burger", price: "12.00", ingredients: null, is_special: false, image_url: null },
+      {
+        id: 11,
+        name: "Poll-Gin",
+        price: "11.50",
+        ingredients: "Sovracoscia di pollo impanata ai cornflakes, crema di piselli, stracciata di bufala",
+        is_special: false,
+        image_url: "https://admin.anticoburger.it/storage/menu/pollgin.png",
+      },
+    ],
+  },
+  {
+    id: 5,
+    name: "Bibite",
+    items: [{ id: 21, name: "Acqua naturale", price: "2.00", ingredients: null, is_special: false, image_url: null }],
+  },
+];

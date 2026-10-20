@@ -1,4 +1,4 @@
-import { ArrowRight, Clock } from "lucide-react";
+import { ArrowRight, Clock, UtensilsCrossed } from "lucide-react";
 import Link from "next/link";
 import { ContactRestaurant } from "@/components/common/contact-restaurant";
 import { AppShell } from "@/components/layout/app-shell";
@@ -16,7 +16,7 @@ export default function HomePage() {
         {/* Gruppo centrato in verticale: sugli schermi alti lo spazio libero si divide sopra e sotto. */}
         <div className="flex flex-1 flex-col justify-center gap-10 px-safe py-10 sm:px-8 sm:py-12">
           <div className="flex flex-col items-center gap-8 text-center">
-            <Wordmark width={232} priority />
+            <Wordmark width={232} preload />
             <div className="flex items-center gap-3 text-brass" aria-hidden>
               <span className="h-px w-10 bg-current" />
               <span className="size-1 rotate-45 bg-current" />
@@ -54,6 +54,10 @@ export default function HomePage() {
         </div>
 
         <BottomActionBar>
+          <Link href="/menu" className={buttonVariants({ variant: "outline", size: "xl" })}>
+            <UtensilsCrossed aria-hidden data-icon="inline-start" />
+            Scopri il menu
+          </Link>
           <Link href="/prenota" className={buttonVariants({ size: "xl" })}>
             Prenota un tavolo
             <ArrowRight aria-hidden data-icon="inline-end" />

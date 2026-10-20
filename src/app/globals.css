@@ -20,6 +20,13 @@
   --color-brass: var(--brass);
   --color-brass-foreground: var(--brass-foreground);
   --color-success: var(--success);
+  --color-menu-page: var(--menu-page);
+  --color-menu-brown: var(--menu-brown);
+  --color-menu-brown-deep: var(--menu-brown-deep);
+  --color-menu-beige: var(--menu-beige);
+  --color-menu-cream: var(--menu-cream);
+  --color-menu-ink: var(--menu-ink);
+  --color-menu-gold: var(--menu-gold);
   --color-muted-foreground: var(--muted-foreground);
   --color-muted: var(--muted);
   --color-secondary-foreground: var(--secondary-foreground);
@@ -65,6 +72,14 @@
   --brass: oklch(0.605 0.083 79.7); /* ottone #9C7C45 */
   --brass-foreground: oklch(0.512 0.07 79.4); /* #7C6236 */
   --success: oklch(0.47 0.09 150);
+  /* Menu: colori misurati sulla grafica ufficiale. Crema su marrone 14.2:1, inchiostro su beige 11.2:1. */
+  --menu-page: oklch(0.954 0.023 84.6); /* #F7EFDF */
+  --menu-brown: oklch(0.246 0.065 32); /* #3A120B */
+  --menu-brown-deep: oklch(0.205 0.056 31.8); /* #2C0B06, bordi della vignettatura */
+  --menu-beige: oklch(0.864 0.046 71.4); /* #E6CEB2 */
+  --menu-cream: oklch(0.947 0.024 88.2); /* #F4EDDC */
+  --menu-ink: oklch(0.236 0.08 28.7); /* #3C0906 */
+  --menu-gold: oklch(0.74 0.125 72.2); /* #DB9D48, solo decorativo */
   --destructive: oklch(0.5 0.182 29.5); /* #B42318 */
   --border: oklch(0.898 0.019 75.3); /* #E5DCD0 */
   --input: oklch(0.928 0.015 77.1); /* #EDE6DC */

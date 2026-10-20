@@ -63,6 +63,8 @@ async function main() {
   for (const [name, rgb] of [
     ["wordmark-dark.png", [0, 0, 0]],
     ["wordmark-light.png", [255, 255, 255]],
+    // Bordeaux del brand: usato nell'intestazione del menu.
+    ["wordmark-bordeaux.png", [49, 23, 19]],
   ]) {
     const output = path.join(brandDir, name);
     await coloredWordmark(mask, rgb).png({ compressionLevel: 9 }).toFile(output);

@@ -89,3 +89,18 @@ export type Reservation = {
 export type CreatedReservation = Reservation & {
   cancellation_token: string;
 };
+
+export type MenuItem = {
+  id: number;
+  name: string;
+  /** Decimale come stringa, sempre 2 cifre ("14.90"). */
+  price: string;
+  /** Testo libero, può contenere virgole. */
+  ingredients: string | null;
+  is_special: boolean;
+  /** URL assoluto dell'immagine sul backend. */
+  image_url: string | null;
+};
+
+/** Le categorie arrivano nell'ordine deciso dall'admin; quelle vuote non vengono restituite. */
+export type MenuCategory = { id: number; name: string; items: MenuItem[] };

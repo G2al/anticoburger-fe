@@ -3,16 +3,22 @@
  * - /_next/static, icone, immagini e font: cache-first (nomi con hash, quindi immutabili).
  * - Navigazioni: network-first con fallback alla copia in cache o a /offline.
  * - Mai in cache: API (/api/v1, anche su altro dominio), richieste non GET, /prenotazione.
+ *   Unica eccezione: GET /api/v1/menu, contenuto di consultazione (network-first, copia per l'offline).
+ *   Disponibilità, calendario e prenotazioni restano sempre e solo in rete.
+ * - Foto del menu (storage del backend, dirette o via /_next/image): stale-while-revalidate.
  * La versione arriva dall'URL di registrazione (/sw.js?v=<build>): cambia a ogni build.
  */
 
 const VERSION = new URL(self.location.href).searchParams.get("v") || "dev";
 const STATIC_CACHE = `ab-static-${VERSION}`;
 const PAGES_CACHE = `ab-pages-${VERSION}`;
+const MENU_DATA_CACHE = `ab-menu-data-${VERSION}`;
+const MENU_IMAGES_CACHE = `ab-menu-images-${VERSION}`;
+const KEEP_CACHES = [STATIC_CACHE, PAGES_CACHE, MENU_DATA_CACHE, MENU_IMAGES_CACHE];
 
 const OFFLINE_URL = "/offline";
 // Shell senza dati personali: le pagine leggono storage e API solo nel browser.
-const CACHEABLE_PAGES = ["/", "/prenota", "/prenotazioni", OFFLINE_URL];
+const CACHEABLE_PAGES = ["/", "/menu", "/prenota", "/prenotazioni", OFFLINE_URL];
 const PRECACHE_ASSETS = [
   "/manifest.webmanifest",
   "/icons/icon-192.png",
@@ -38,7 +44,7 @@ self.addEventListener("activate", (event) => {
       .then((keys) =>
         Promise.all(
           keys
-            .filter((key) => key.startsWith("ab-") && key !== STATIC_CACHE && key !== PAGES_CACHE)
+            .filter((key) => key.startsWith("ab-") && !KEEP_CACHES.includes(key))
             .map((key) => caches.delete(key)),
         ),
       )
@@ -50,6 +56,50 @@ self.addEventListener("message", (event) => {
   if (event.data && event.data.type === "SKIP_WAITING") self.skipWaiting();
 });
 
+/** Solo il menu: nessun altro endpoint API entra mai in cache. */
+function isMenuApi(url) {
+  return url.pathname.endsWith("/api/v1/menu");
+}
+
+/** Foto caricate da Filament: dirette dallo storage del backend oppure ottimizzate da /_next/image. */
+function isMenuImage(url) {
+  if (url.pathname.startsWith("/storage/")) return url.origin !== self.location.origin;
+  if (url.origin === self.location.origin && url.pathname.startsWith("/_next/image")) {
+    try {
+      return new URL(url.searchParams.get("url") || "").pathname.startsWith("/storage/");
+    } catch {
+      return false;
+    }
+  }
+  return false;
+}
+
+async function networkFirstMenu(request) {
+  const cache = await caches.open(MENU_DATA_CACHE);
+  try {
+    const response = await fetch(request);
+    if (response.ok) cache.put(request, response.clone());
+    return response;
+  } catch (error) {
+    const cached = await cache.match(request);
+    if (cached) return cached;
+    throw error;
+  }
+}
+
+async function staleWhileRevalidate(request) {
+  const cache = await caches.open(MENU_IMAGES_CACHE);
+  const cached = await cache.match(request);
+  const network = fetch(request)
+    .then((response) => {
+      // Le immagini cross-origin senza CORS sono "opaque": si possono comunque conservare.
+      if (response.ok || response.type === "opaque") cache.put(request, response.clone());
+      return response;
+    })
+    .catch(() => cached || Response.error());
+  return cached || network;
+}
+
 function isStaticAsset(url) {
   return (
     url.pathname.startsWith("/_next/static/") ||
@@ -57,7 +107,8 @@ function isStaticAsset(url) {
     url.pathname.startsWith("/icons/") ||
     url.pathname.startsWith("/brand/") ||
     url.pathname.startsWith("/images/") ||
-    /\.(?:png|svg|ico|woff2?)$/.test(url.pathname)
+    url.pathname.startsWith("/menu/") ||
+    /\.(?:png|webp|jpe?g|svg|ico|woff2?)$/.test(url.pathname)
   );
 }
 
@@ -96,7 +147,17 @@ self.addEventListener("fetch", (event) => {
   if (request.method !== "GET") return;
 
   const url = new URL(request.url);
-  // API e qualsiasi altra origine passano sempre dalla rete, senza cache.
+
+  if (isMenuApi(url)) {
+    event.respondWith(networkFirstMenu(request));
+    return;
+  }
+  if (isMenuImage(url)) {
+    event.respondWith(staleWhileRevalidate(request));
+    return;
+  }
+
+  // Tutte le altre API e qualsiasi altra origine passano sempre dalla rete, senza cache.
   if (url.origin !== self.location.origin || url.pathname.startsWith("/api/")) return;
 
   if (request.mode === "navigate") {

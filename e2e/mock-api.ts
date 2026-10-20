@@ -1,5 +1,5 @@
 import type { Page } from "@playwright/test";
-import { calendarFor, DEFAULT_SLOTS, NOW, settings } from "../tests/msw/fixtures";
+import { calendarFor, DEFAULT_SLOTS, menuFixture, NOW, settings } from "../tests/msw/fixtures";
 import { E2E_API_BASE_URL } from "../playwright.config";
 
 // Backend simulato con page.route, con le stesse forme del contratto API.
@@ -27,6 +27,7 @@ export async function mockApi(page: Page) {
 
     if (request.method() === "OPTIONS") return route.fulfill({ status: 204, headers: cors });
     if (path === "/booking-settings") return json({ data: settings });
+    if (path === "/menu") return json({ data: menuFixture });
     if (path === "/calendar") {
       return json({ data: calendarFor(url.searchParams.get("month")!, Number(url.searchParams.get("party_size"))) });
     }

@@ -30,6 +30,10 @@ for (const viewport of VIEWPORTS) {
     await expectNoHorizontalScroll(page);
     await expectInViewport(page, "Prenota un tavolo");
 
+    await page.goto("/menu");
+    await expect(page.getByRole("article", { name: "Antico Burger" })).toBeVisible();
+    await expectNoHorizontalScroll(page);
+
     await page.goto("/prenota");
     await page.getByRole("button", { name: "2 persone" }).click();
     await expectInViewport(page, "Continua");

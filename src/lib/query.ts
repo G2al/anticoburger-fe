@@ -7,12 +7,15 @@ export const queryKeys = {
   calendar: (month: string, partySize: number) => ["calendar", month, partySize] as const,
   availabilityAll: ["availability"] as const,
   availability: (date: string, partySize: number) => ["availability", date, partySize] as const,
+  menu: ["menu"] as const,
   // Il token non entra mai nella chiave.
   reservation: (reference: string) => ["reservation", reference] as const,
 };
 
 export const SETTINGS_STALE_TIME = 5 * 60_000;
 export const AVAILABILITY_STALE_TIME = 30_000;
+/** Allineato al Cache-Control del backend (max-age=60). */
+export const MENU_STALE_TIME = 60_000;
 
 export function createQueryClient(): QueryClient {
   return new QueryClient({

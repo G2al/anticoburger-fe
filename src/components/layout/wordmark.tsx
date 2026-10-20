@@ -7,21 +7,22 @@ const RATIO = 450 / 1300;
 export function Wordmark({
   width,
   variant = "dark",
-  priority = false,
+  preload = false,
   className,
 }: {
   width: number;
-  variant?: "dark" | "light";
-  priority?: boolean;
+  variant?: "dark" | "light" | "bordeaux";
+  /** Precarica l'immagine (al posto di `priority`, deprecato in Next 16). */
+  preload?: boolean;
   className?: string;
 }) {
   return (
     <Image
-      src={variant === "dark" ? "/brand/wordmark-dark.png" : "/brand/wordmark-light.png"}
+      src={`/brand/wordmark-${variant}.png`}
       alt="Antico Burger"
       width={width}
       height={Math.round(width * RATIO)}
-      priority={priority}
+      preload={preload}
       sizes={`${width}px`}
       className={cn("h-auto select-none", className)}
       draggable={false}

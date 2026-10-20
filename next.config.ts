@@ -8,6 +8,14 @@ const nextConfig: NextConfig = {
   cacheComponents: true,
   partialPrefetching: true,
   poweredByHeader: false,
+  images: {
+    // Foto del menu caricate da Filament (storage pubblico del backend).
+    remotePatterns: [
+      new URL("https://admin.anticoburger.it/storage/**"),
+      new URL("http://127.0.0.1:8000/storage/**"),
+      new URL("http://localhost:8000/storage/**"),
+    ],
+  },
   env: {
     NEXT_PUBLIC_APP_VERSION: appVersion,
   },
