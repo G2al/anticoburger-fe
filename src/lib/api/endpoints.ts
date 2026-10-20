@@ -2,6 +2,7 @@ import { apiRequest } from "./client";
 import type {
   Availability,
   BookingSettings,
+  BookingHours,
   Calendar,
   CreatedReservation,
   CreateReservationInput,
@@ -11,6 +12,10 @@ import type {
 
 export function getBookingSettings(signal?: AbortSignal) {
   return apiRequest<BookingSettings>("/booking-settings", { signal });
+}
+
+export function getBookingHours(signal?: AbortSignal) {
+  return apiRequest<BookingHours>("/booking-hours", { signal });
 }
 
 export function getCalendar(month: string, partySize: number, signal?: AbortSignal) {

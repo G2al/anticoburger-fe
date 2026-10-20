@@ -3,6 +3,7 @@ import { isTransientError } from "@/lib/api/errors";
 
 export const queryKeys = {
   settings: ["booking-settings"] as const,
+  bookingHours: ["booking-hours"] as const,
   calendarAll: ["calendar"] as const,
   calendar: (month: string, partySize: number) => ["calendar", month, partySize] as const,
   availabilityAll: ["availability"] as const,

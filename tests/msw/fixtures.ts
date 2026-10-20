@@ -1,9 +1,17 @@
-import type { BookingSettings, Calendar, CalendarDayStatus, MenuCategory } from "@/lib/api/types";
+import type { BookingHours, BookingSettings, Calendar, CalendarDayStatus, MenuCategory } from "@/lib/api/types";
 
 export const API = "http://api.test/api/v1";
 
 /** "Adesso" dei test: venerdì 16 ottobre 2026, 10:00 a Roma. */
 export const NOW = new Date("2026-10-16T08:00:00Z");
+
+export const bookingHours: BookingHours = {
+  timezone: "Europe/Rome",
+  days: Array.from({ length: 7 }, (_, index) => ({
+    day_of_week: index + 1,
+    ranges: index === 1 ? [] : [{ first_booking_time: "18:30", last_booking_time: index === 5 ? "21:00" : "23:25" }],
+  })),
+};
 
 export const settings: BookingSettings = {
   timezone: "Europe/Rome",

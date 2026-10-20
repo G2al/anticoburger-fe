@@ -26,9 +26,4 @@ export const restaurant = {
     /** Possibile attesa all'arrivo, non garantita né sistematica. */
     possibleWaitMinutes: 15,
   },
-  /** ⚠️ SEGNAPOSTO: orari indicativi da confermare, non usati per calcolare la disponibilità. */
-  openingHours: [
-    { days: "Martedì – Domenica", hours: "19:00 – 23:30" },
-    { days: "Lunedì", hours: "Chiuso" },
-  ],
 } as const;

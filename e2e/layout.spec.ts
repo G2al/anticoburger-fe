@@ -27,6 +27,9 @@ for (const viewport of VIEWPORTS) {
     await mockApi(page);
 
     await page.goto("/");
+    const hours = page.getByRole("list", { name: "Orari settimanali di prenotazione" });
+    await expect(hours.getByRole("listitem").filter({ hasText: "Martedì" })).toHaveText("MartedìChiuso");
+    await expect(hours.getByRole("listitem").filter({ hasText: "Sabato" })).toHaveText("Sabato18:30 – 21:00");
     await expectNoHorizontalScroll(page);
     await expectInViewport(page, "Prenota un tavolo");
 

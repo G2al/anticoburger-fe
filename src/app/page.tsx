@@ -1,6 +1,7 @@
-import { ArrowRight, Clock, UtensilsCrossed } from "lucide-react";
+import { ArrowRight, UtensilsCrossed } from "lucide-react";
 import Link from "next/link";
 import { ContactRestaurant } from "@/components/common/contact-restaurant";
+import { BookingHours } from "@/components/home/booking-hours";
 import { AppShell } from "@/components/layout/app-shell";
 import { BottomActionBar } from "@/components/layout/bottom-action-bar";
 import { Wordmark } from "@/components/layout/wordmark";
@@ -38,17 +39,7 @@ export default function HomePage() {
             <h2 id="info-title" className="text-sm font-medium tracking-wide text-muted-foreground uppercase">
               {restaurant.name}
             </h2>
-            <ul className="flex flex-col gap-1.5 text-sm">
-              {restaurant.openingHours.map((row) => (
-                <li key={row.days} className="flex items-center justify-between gap-4">
-                  <span className="flex items-center gap-2">
-                    <Clock className="size-4 text-brass" aria-hidden />
-                    {row.days}
-                  </span>
-                  <span className="text-muted-foreground tabular">{row.hours}</span>
-                </li>
-              ))}
-            </ul>
+            <BookingHours />
             <ContactRestaurant />
           </section>
         </div>

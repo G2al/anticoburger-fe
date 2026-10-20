@@ -1,7 +1,7 @@
 import { http, HttpResponse } from "msw";
 import type { CreatedReservation, CreateReservationInput, Reservation } from "@/lib/api/types";
 import { normalizePhone } from "@/lib/phone";
-import { API, calendarFor, DEFAULT_SLOTS, menuFixture, settings } from "./fixtures";
+import { API, bookingHours, calendarFor, DEFAULT_SLOTS, menuFixture, settings } from "./fixtures";
 
 // Simulazione del backend fedele al contratto (FRONTEND_HANDOFF.md): stesse forme e stessi codici.
 
@@ -31,6 +31,7 @@ function endsAt(date: string, time: string) {
 }
 
 export const handlers = [
+  http.get(`${API}/booking-hours`, () => HttpResponse.json({ data: bookingHours })),
   http.get(`${API}/booking-settings`, () => HttpResponse.json({ data: settings })),
 
   http.get(`${API}/menu`, () =>

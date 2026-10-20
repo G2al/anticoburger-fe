@@ -41,6 +41,14 @@ export type BookingSettings = {
   party_sizes: number[];
 };
 
+export type BookingHours = {
+  timezone: string;
+  days: {
+    day_of_week: number;
+    ranges: { first_booking_time: string; last_booking_time: string }[];
+  }[];
+};
+
 export type CalendarDayStatus = "available" | "fully_booked" | "closed" | "not_bookable";
 
 export type CalendarDay = { date: string; status: CalendarDayStatus };
