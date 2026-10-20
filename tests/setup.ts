@@ -22,6 +22,18 @@ Element.prototype.scrollIntoView = () => {};
 Element.prototype.setPointerCapture ??= () => {};
 Element.prototype.releasePointerCapture ??= () => {};
 Element.prototype.hasPointerCapture ??= () => false;
+// Usato da Motion (whileInView) e dalla barra delle categorie del menu.
+globalThis.IntersectionObserver ??= class {
+  readonly root = null;
+  readonly rootMargin = "";
+  readonly thresholds = [];
+  observe() {}
+  unobserve() {}
+  disconnect() {}
+  takeRecords() {
+    return [];
+  }
+} as unknown as typeof IntersectionObserver;
 window.matchMedia ??= (query: string) =>
   ({
     matches: false,

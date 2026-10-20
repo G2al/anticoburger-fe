@@ -27,6 +27,7 @@
   --color-menu-cream: var(--menu-cream);
   --color-menu-ink: var(--menu-ink);
   --color-menu-gold: var(--menu-gold);
+  --color-menu-gold-ink: var(--menu-gold-ink);
   --color-muted-foreground: var(--muted-foreground);
   --color-muted: var(--muted);
   --color-secondary-foreground: var(--secondary-foreground);
@@ -79,7 +80,8 @@
   --menu-beige: oklch(0.864 0.046 71.4); /* #E6CEB2 */
   --menu-cream: oklch(0.947 0.024 88.2); /* #F4EDDC */
   --menu-ink: oklch(0.236 0.08 28.7); /* #3C0906 */
-  --menu-gold: oklch(0.74 0.125 72.2); /* #DB9D48, solo decorativo */
+  --menu-gold: oklch(0.74 0.125 72.2); /* #DB9D48: decorativo su crema, testo solo su marrone (7:1) */
+  --menu-gold-ink: oklch(0.519 0.102 72.5); /* #8C5E17: oro per testo su crema (4.9:1) */
   --destructive: oklch(0.5 0.182 29.5); /* #B42318 */
   --border: oklch(0.898 0.019 75.3); /* #E5DCD0 */
   --input: oklch(0.928 0.015 77.1); /* #EDE6DC */

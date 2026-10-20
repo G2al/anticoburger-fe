@@ -1,9 +1,13 @@
 "use client";
 
+import { Sparkles } from "lucide-react";
 import { useReducedMotion } from "motion/react";
 import { useEffect, useRef, useState } from "react";
 import type { MenuCategory } from "@/lib/api/types";
 import { cn } from "@/lib/utils";
+
+/** Id della sezione "Special" (derivata dai dati): gli id del backend partono da 1. */
+export const SPECIAL_CATEGORY_ID = 0;
 
 export function categorySectionId(category: Pick<MenuCategory, "id">) {
   return `categoria-${category.id}`;
@@ -52,6 +56,7 @@ export function MenuCategoryNav({ categories }: { categories: MenuCategory[] }) 
       <ul className="flex snap-x gap-2 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {categories.map((category) => {
           const selected = category.id === active;
+          const special = category.id === SPECIAL_CATEGORY_ID;
           return (
             <li key={category.id} className="snap-start">
               <button
@@ -63,12 +68,14 @@ export function MenuCategoryNav({ categories }: { categories: MenuCategory[] }) 
                 onClick={() => goTo(category)}
                 aria-current={selected ? "true" : undefined}
                 className={cn(
-                  "min-h-11 cursor-pointer rounded-full border px-4 text-sm font-medium whitespace-nowrap transition-colors outline-none focus-visible:ring-3 focus-visible:ring-menu-gold/50",
+                  "inline-flex min-h-11 cursor-pointer items-center gap-1.5 rounded-full border px-4 text-sm font-medium whitespace-nowrap transition-colors outline-none focus-visible:ring-3 focus-visible:ring-menu-gold/50",
                   selected
                     ? "border-menu-brown bg-menu-brown text-menu-cream"
                     : "border-menu-ink/15 bg-menu-cream text-menu-ink hover:border-menu-ink/35",
+                  special && "border-menu-gold",
                 )}
               >
+                {special && <Sparkles className={cn("size-3.5", selected ? "text-menu-gold" : "text-menu-gold-ink")} aria-hidden />}
                 {category.name}
               </button>
             </li>

@@ -31,7 +31,8 @@ for (const viewport of VIEWPORTS) {
     await expectInViewport(page, "Prenota un tavolo");
 
     await page.goto("/menu");
-    await expect(page.getByRole("article", { name: "Antico Burger" })).toBeVisible();
+    await expect(page.getByRole("region", { name: "Special" })).toBeVisible();
+    await expect(page.getByRole("region", { name: "Panini" }).getByRole("article", { name: "Antico Burger" })).toBeVisible();
     await expectNoHorizontalScroll(page);
 
     await page.goto("/prenota");

@@ -4,9 +4,9 @@ import { UtensilsCrossed } from "lucide-react";
 import { ErrorState, OfflineState } from "@/components/common/error-state";
 import { useHydrated } from "@/hooks/use-hydrated";
 import { useMenu } from "@/hooks/use-menu";
-import type { MenuCategory } from "@/lib/api/types";
-import { MenuCard, MenuCardSkeleton } from "./menu-card";
-import { categorySectionId, MenuCategoryNav } from "./menu-category-nav";
+import type { MenuCategory, MenuItem } from "@/lib/api/types";
+import { MenuCard, MenuCardSkeleton, type MenuTone } from "./menu-card";
+import { categorySectionId, MenuCategoryNav, SPECIAL_CATEGORY_ID } from "./menu-category-nav";
 
 /** Il menu si legge solo nel browser (dato del backend, mai prerenderizzato). */
 export function MenuView() {
@@ -35,15 +35,44 @@ function MenuContent() {
     );
   }
 
+  // Sezione "Special" ricavata dai dati: gli is_special di tutte le categorie, nell'ordine ricevuto.
+  const specials = categories.flatMap((category) => category.items.filter((item) => item.is_special));
+  const special: MenuCategory | null = specials.length
+    ? { id: SPECIAL_CATEGORY_ID, name: "Special", items: specials }
+    : null;
+  const navCategories = special ? [special, ...categories] : categories;
+
   return (
     <div className="flex flex-col gap-6">
-      {categories.length > 1 && <MenuCategoryNav categories={categories} />}
+      {navCategories.length > 1 && <MenuCategoryNav categories={navCategories} />}
       <div className="flex flex-col gap-14">
+        {special && <SpecialSection category={special} />}
         {categories.map((category) => (
           <CategorySection key={category.id} category={category} />
         ))}
       </div>
     </div>
+  );
+}
+
+function SpecialSection({ category }: { category: MenuCategory }) {
+  const headingId = `${categorySectionId(category)}-titolo`;
+  return (
+    <section
+      id={categorySectionId(category)}
+      data-category-id={category.id}
+      aria-labelledby={headingId}
+      className="flex scroll-mt-20 flex-col gap-12"
+    >
+      <h2 id={headingId} className="flex items-center gap-4 text-menu-gold-ink">
+        <span aria-hidden className="h-px flex-1 bg-menu-gold/60" />
+        <span className="font-[family-name:var(--font-menu-script)] text-[2.6rem] leading-none">Special</span>
+        <span aria-hidden className="h-px flex-1 bg-menu-gold/60" />
+      </h2>
+      {category.items.map((item) => (
+        <MenuCard key={item.id} item={item} tone="special" idPrefix="special" />
+      ))}
+    </section>
   );
 }
 
@@ -63,12 +92,23 @@ function CategorySection({ category }: { category: MenuCategory }) {
         </span>
         <span aria-hidden className="h-px flex-1 bg-menu-gold/60" />
       </h2>
-      {/* Ordine dei prodotti quello ricevuto; schede alternate marrone/beige, da marrone in ogni categoria. */}
-      {category.items.map((item, index) => (
-        <MenuCard key={item.id} item={item} tone={index % 2 === 0 ? "dark" : "light"} />
+      {/* Ordine ricevuto. Special con la propria scheda; gli altri alternati marrone/beige, da marrone in ogni categoria. */}
+      {withTones(category.items).map(({ item, tone }) => (
+        <MenuCard key={item.id} item={item} tone={tone} />
       ))}
     </section>
   );
+}
+
+/** L'alternanza marrone/beige conta solo i prodotti non Special, così resta regolare. */
+function withTones(items: MenuItem[]): { item: MenuItem; tone: MenuTone }[] {
+  let regular = 0;
+  return items.map((item) => {
+    if (item.is_special) return { item, tone: "special" };
+    const tone = regular % 2 === 0 ? "dark" : "light";
+    regular += 1;
+    return { item, tone };
+  });
 }
 
 /** Stesse dimensioni dei contenuti finali: nessuno spostamento quando arriva il menu. */

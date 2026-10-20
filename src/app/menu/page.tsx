@@ -8,7 +8,7 @@ import { MenuHeader } from "@/components/menu/menu-header";
 import { MenuView } from "@/components/menu/menu-view";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { menuSerif } from "./fonts";
+import { menuScript, menuSerif } from "./fonts";
 
 export const metadata: Metadata = {
   title: { absolute: "Menu – Antico Burger" },
@@ -17,7 +17,7 @@ export const metadata: Metadata = {
 
 export default function MenuPage() {
   return (
-    <AppShell className={cn(menuSerif.variable, "bg-menu-page sm:bg-menu-page")}>
+    <AppShell className={cn(menuSerif.variable, menuScript.variable, "bg-menu-page sm:bg-menu-page")}>
       <Header backHref="/" showWordmark={false} />
       <main className="flex flex-1 flex-col">
         <div className="flex flex-col gap-10 px-safe pt-2 pb-8 sm:px-6">

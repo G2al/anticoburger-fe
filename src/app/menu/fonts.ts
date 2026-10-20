@@ -1,4 +1,4 @@
-import { Playfair_Display } from "next/font/google";
+import { Great_Vibes, Playfair_Display } from "next/font/google";
 
 // Font solo per la pagina menu: non pesano sul resto dell'app.
 
@@ -10,3 +10,10 @@ export const menuSerif = Playfair_Display({
   display: "swap",
 });
 
+/** Corsivo calligrafico per la scritta "Special", come nella grafica originale. */
+export const menuScript = Great_Vibes({
+  variable: "--font-menu-script",
+  subsets: ["latin"],
+  weight: "400",
+  display: "swap",
+});

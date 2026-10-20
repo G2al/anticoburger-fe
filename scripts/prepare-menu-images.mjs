@@ -13,6 +13,8 @@ const outputDir = path.join(root, "public/menu");
 const backgrounds = [
   { source: "Pannello bordeaux con pennellate grunge.png", output: "bg-dark.webp" },
   { source: "Banner Pergamena Beige con Pennellata.png", output: "bg-light.webp" },
+  // Prodotti "Special": bordeaux con pennellata oro (immagine già senza angoli arrotondati).
+  { source: "bg-special.png", output: "bg-special.webp" },
 ];
 
 /**

@@ -19,9 +19,10 @@ export default defineConfig({
     timezoneId: "Europe/Rome",
   },
   projects: [
-    { name: "mobile-chrome", testMatch: /booking\.spec\.ts/, use: { ...devices["Pixel 7"] } },
-    { name: "mobile-safari", testMatch: /booking\.spec\.ts/, use: { ...devices["iPhone 14"] } },
-    { name: "viewports", testMatch: /layout\.spec\.ts/, use: { ...devices["Desktop Chrome"] } },
+    // page.route non intercetta le richieste gestite dal service worker: le suite mock lo bloccano.
+    { name: "mobile-chrome", testMatch: /booking\.spec\.ts/, use: { ...devices["Pixel 7"], serviceWorkers: "block" } },
+    { name: "mobile-safari", testMatch: /booking\.spec\.ts/, use: { ...devices["iPhone 14"], serviceWorkers: "block" } },
+    { name: "viewports", testMatch: /layout\.spec\.ts/, use: { ...devices["Desktop Chrome"], serviceWorkers: "block" } },
     { name: "backend", testMatch: /backend\.spec\.ts/, use: { ...devices["Pixel 7"] } },
   ],
   webServer: {
