@@ -9,6 +9,9 @@ const nextConfig: NextConfig = {
   partialPrefetching: true,
   poweredByHeader: false,
   images: {
+    // Le foto del backend hanno nomi unici (nuovo caricamento = nuovo nome): si possono tenere in cache a lungo.
+    // Default di Next: 4 ore. Qui 30 giorni, per server e browser.
+    minimumCacheTTL: 60 * 60 * 24 * 30,
     // Foto del menu caricate da Filament (storage pubblico del backend).
     remotePatterns: [
       new URL("https://admin.anticoburger.it/storage/**"),

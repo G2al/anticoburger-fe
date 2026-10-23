@@ -230,3 +230,29 @@ describe("Dettaglio prodotto", () => {
     expect(within(dialog).getByText("Special")).toBeInTheDocument();
   });
 });
+
+describe("Foto del dettaglio progressiva", () => {
+  it("mostra subito la foto della scheda e poi, in dissolvenza, quella più definita", async () => {
+    const { user } = renderWithProviders(<MenuView />);
+    const panini = await section("Panini");
+    const cardPhoto = within(within(panini).getByRole("article", { name: "Poll-Gin" })).getByRole("img", {
+      name: "Poll-Gin",
+    });
+    await user.click(within(panini).getByRole("button", { name: "Dettagli di Poll-Gin" }));
+    const dialog = await screen.findByRole("dialog", { name: "Poll-Gin" });
+
+    const [preview, sharp] = dialog.querySelectorAll("img");
+    // Stesso file della scheda: già nella cache del browser, quindi immediato.
+    expect(preview.getAttribute("srcset")).toBe(cardPhoto.getAttribute("srcset"));
+    expect(preview.getAttribute("sizes")).toBe(cardPhoto.getAttribute("sizes"));
+    expect(preview).toHaveAttribute("aria-hidden", "true");
+    // Versione definita: altre dimensioni, invisibile finché non è caricata.
+    expect(sharp.getAttribute("sizes")).not.toBe(cardPhoto.getAttribute("sizes"));
+    expect(sharp).toHaveClass("opacity-0");
+
+    // next/image richiama onLoad dopo img.decode(), in modo asincrono.
+    fireEvent.load(sharp);
+    await waitFor(() => expect(sharp).toHaveClass("opacity-100"));
+    expect(preview).toHaveClass("opacity-0");
+  });
+});

@@ -8,6 +8,7 @@ import { useMenu } from "@/hooks/use-menu";
 import type { MenuCategory, MenuItem } from "@/lib/api/types";
 import { MenuCard, MenuCardSkeleton, type MenuTone } from "./menu-card";
 import { categorySectionId, MenuCategoryNav, SPECIAL_CATEGORY_ID } from "./menu-category-nav";
+import { preloadDetailImage } from "./menu-image";
 import { MenuItemDialog, type MenuDetail } from "./menu-item-dialog";
 
 /** Apre il dettaglio di un prodotto (chiamato dal tocco sulla scheda). */
@@ -101,6 +102,7 @@ function SpecialSection({
           item={item}
           tone="special"
           idPrefix="special"
+          onIntent={() => preloadDetailImage(item.image_url)}
           onOpen={(event) => onOpen({ item, tone: "special", category: categoryOf.get(item.id) ?? "Special" }, event)}
         />
       ))}
@@ -130,6 +132,7 @@ function CategorySection({ category, onOpen }: { category: MenuCategory; onOpen:
           key={item.id}
           item={item}
           tone={tone}
+          onIntent={() => preloadDetailImage(item.image_url)}
           onOpen={(event) => onOpen({ item, tone, category: category.name }, event)}
         />
       ))}

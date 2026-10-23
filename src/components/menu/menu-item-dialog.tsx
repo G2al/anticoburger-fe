@@ -10,7 +10,7 @@ import { buttonVariants } from "@/components/ui/button";
 import type { MenuItem } from "@/lib/api/types";
 import { cn } from "@/lib/utils";
 import { MENU_BACKGROUND, type MenuTone } from "./menu-card";
-import { MenuImage } from "./menu-image";
+import { MenuDetailImage } from "./menu-image";
 import { MenuPrice } from "./menu-price";
 
 export type MenuDetail = { item: MenuItem; tone: MenuTone; category: string };
@@ -87,7 +87,7 @@ function DetailBody({ detail, onNavigate }: { detail: MenuDetail; onNavigate: ()
           animate={{ opacity: 1, scale: 1, y: 0 }}
           transition={{ type: "spring", stiffness: 260, damping: 24, delay: 0.06 }}
         >
-          <MenuImage url={item.image_url} name={item.name} dark={tone !== "light"} sizes="(min-width: 640px) 460px, 90vw" />
+          <MenuDetailImage url={item.image_url} name={item.name} dark={tone !== "light"} />
         </m.div>
         <DialogPrimitive.Close
           aria-label="Chiudi"
@@ -125,7 +125,7 @@ function DetailBody({ detail, onNavigate }: { detail: MenuDetail; onNavigate: ()
                 <m.li
                   key={`${ingredient}-${index}`}
                   variants={itemVariants}
-                  className="rounded-full border border-menu-gold/45 bg-menu-cream px-3.5 py-1.5 text-sm leading-tight text-menu-ink"
+                  className="rounded-2xl border border-menu-gold/45 bg-menu-cream px-3.5 py-1.5 text-sm leading-snug text-menu-ink"
                 >
                   {ingredient}
                 </m.li>

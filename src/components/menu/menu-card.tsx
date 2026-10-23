@@ -1,5 +1,5 @@
 import { Plus } from "lucide-react";
-import type { MouseEvent } from "react";
+import type { MouseEvent, PointerEvent } from "react";
 import type { MenuItem } from "@/lib/api/types";
 import { cn } from "@/lib/utils";
 import { MenuImage } from "./menu-image";
@@ -30,11 +30,14 @@ export function MenuCard({
   tone,
   idPrefix = "menu",
   onOpen,
+  onIntent,
 }: {
   item: MenuItem;
   tone: MenuTone;
   idPrefix?: string;
   onOpen?: (event: MouseEvent<HTMLButtonElement>) => void;
+  /** Intenzione di aprire (tocco o mouse sopra): serve a precaricare la foto del dettaglio. */
+  onIntent?: () => void;
 }) {
   const light = tone === "light";
   const special = tone === "special";
@@ -126,6 +129,10 @@ export function MenuCard({
           <button
             type="button"
             onClick={onOpen}
+            onPointerDown={onIntent}
+            onPointerEnter={(event: PointerEvent<HTMLButtonElement>) => {
+              if (event.pointerType === "mouse") onIntent?.();
+            }}
             aria-haspopup="dialog"
             aria-label={`Dettagli di ${item.name}`}
             className="absolute inset-0 z-10 cursor-pointer rounded-[inherit] outline-none focus-visible:ring-3 focus-visible:ring-menu-gold focus-visible:ring-offset-2 focus-visible:ring-offset-menu-page"
