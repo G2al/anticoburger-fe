@@ -12,6 +12,12 @@ vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: vi.fn(), replace: vi.fn(), back: vi.fn(), prefetch: vi.fn(), refresh: vi.fn() }),
 }));
 
+// next/font è trasformato dal compilatore di Next, assente in Vitest: ogni font diventa una classe fittizia.
+vi.mock("next/font/google", () => {
+  const font = () => ({ className: "font-test", variable: "font-test-variable", style: { fontFamily: "test" } });
+  return { Geist: font, Playfair_Display: font, Great_Vibes: font };
+});
+
 // Animazioni istantanee nei test: AnimatePresence non attende le uscite.
 MotionGlobalConfig.skipAnimations = true;
 

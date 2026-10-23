@@ -22,7 +22,18 @@ function isLocalImage(url: string): boolean {
  * Foto del prodotto (PNG/WebP scontornato caricato da Filament). Se manca o non si carica
  * (file rimosso, errore di rete) compare un segnaposto in tinta. Occupa sempre lo stesso box del genitore.
  */
-export function MenuImage({ url, name, dark }: { url: string | null; name: string; dark: boolean }) {
+export function MenuImage({
+  url,
+  name,
+  dark,
+  sizes = "(min-width: 480px) 230px, 48vw",
+}: {
+  url: string | null;
+  name: string;
+  dark: boolean;
+  /** Larghezza mostrata, per scegliere la versione ottimizzata giusta. */
+  sizes?: string;
+}) {
   const [failedUrl, setFailedUrl] = useState<string | null>(null);
 
   if (!url || failedUrl === url) return <MenuImagePlaceholder name={name} dark={dark} />;
@@ -32,7 +43,7 @@ export function MenuImage({ url, name, dark }: { url: string | null; name: strin
       src={url}
       alt={name}
       fill
-      sizes="(min-width: 480px) 230px, 48vw"
+      sizes={sizes}
       unoptimized={isLocalImage(url)}
       onError={() => setFailedUrl(url)}
       className="object-contain object-[50%_45%] drop-shadow-[0_14px_16px_oklch(0.2_0.05_30/0.4)] select-none"

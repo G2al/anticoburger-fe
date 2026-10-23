@@ -1,6 +1,7 @@
+import { Plus } from "lucide-react";
+import type { MouseEvent } from "react";
 import type { MenuItem } from "@/lib/api/types";
 import { cn } from "@/lib/utils";
-import { ExpandableText } from "./expandable-text";
 import { MenuImage } from "./menu-image";
 import { MenuPrice } from "./menu-price";
 import { SpecialShine } from "./special-shine";
@@ -8,7 +9,7 @@ import { SpecialShine } from "./special-shine";
 export type MenuTone = "dark" | "light" | "special";
 
 /** Sfondi della grafica ufficiale (public/menu, generati da `npm run menu-images`). */
-const BACKGROUND: Record<MenuTone, { image: string; position: string }> = {
+export const MENU_BACKGROUND: Record<MenuTone, { image: string; position: string }> = {
   // Pennellata grunge nella metà destra, dietro il panino.
   dark: { image: "url(/menu/bg-dark.webp)", position: "75% center" },
   // Pennellata al centro: cade tra il panino (a sinistra) e il testo.
@@ -21,12 +22,23 @@ const BACKGROUND: Record<MenuTone, { image: string; position: string }> = {
  * Scheda di un prodotto nello stile della grafica del menu.
  * Marrone e Special: testi crema e foto a destra. Beige: testi marroni e foto a sinistra.
  * La foto resta dentro la scheda (sporge appena in alto) e non copre mai il testo.
+ * Tutta la scheda è toccabile (`onOpen`) e apre il dettaglio con foto grande e ingredienti completi.
  * `idPrefix` distingue lo stesso prodotto mostrato due volte (sezione Special e sua categoria).
  */
-export function MenuCard({ item, tone, idPrefix = "menu" }: { item: MenuItem; tone: MenuTone; idPrefix?: string }) {
+export function MenuCard({
+  item,
+  tone,
+  idPrefix = "menu",
+  onOpen,
+}: {
+  item: MenuItem;
+  tone: MenuTone;
+  idPrefix?: string;
+  onOpen?: (event: MouseEvent<HTMLButtonElement>) => void;
+}) {
   const light = tone === "light";
   const special = tone === "special";
-  const background = BACKGROUND[tone];
+  const background = MENU_BACKGROUND[tone];
   const titleId = `${idPrefix}-item-${item.id}`;
 
   return (
@@ -34,7 +46,10 @@ export function MenuCard({ item, tone, idPrefix = "menu" }: { item: MenuItem; to
       aria-labelledby={titleId}
       style={{ backgroundImage: background.image, backgroundPosition: background.position }}
       className={cn(
-        "@container relative isolate rounded-[1.75rem] bg-cover bg-no-repeat shadow-[0_18px_36px_-22px_oklch(0.236_0.08_28.7/0.55)]",
+        "@container group/card relative isolate rounded-[1.75rem] bg-cover bg-no-repeat shadow-[0_18px_36px_-22px_oklch(0.236_0.08_28.7/0.55)]",
+        "transition-[transform,box-shadow] duration-300 ease-out motion-reduce:transition-none",
+        // Sollevamento solo con puntatore vero (su touch l'hover resterebbe attivo dopo il tap); pressione ovunque.
+        onOpen && "has-[button:active]:scale-[0.985] [@media(hover:hover)]:has-[button:hover]:-translate-y-1",
         light ? "bg-menu-beige text-menu-ink" : "bg-menu-brown text-menu-cream",
         special && "shadow-[0_20px_44px_-20px_oklch(0.74_0.125_72.2/0.45)] ring-1 ring-menu-gold/60",
       )}
@@ -68,13 +83,14 @@ export function MenuCard({ item, tone, idPrefix = "menu" }: { item: MenuItem; to
           {item.name}
         </h3>
         {item.ingredients && (
-          <ExpandableText
-            text={item.ingredients}
+          <p
             className={cn(
-              "text-[clamp(0.78rem,3.5cqw,0.95rem)] leading-snug",
+              "line-clamp-3 text-[clamp(0.78rem,3.5cqw,0.95rem)] leading-snug text-pretty",
               light ? "text-menu-ink/85" : "text-menu-cream/90",
             )}
-          />
+          >
+            {item.ingredients}
+          </p>
         )}
         <span
           aria-hidden
@@ -86,12 +102,36 @@ export function MenuCard({ item, tone, idPrefix = "menu" }: { item: MenuItem; to
       {/* Colonna della foto (47%): alta quanto la scheda, sporge del 6% in alto. */}
       <div
         className={cn(
-          "pointer-events-none absolute -top-[6%] bottom-[1%] w-[47%]",
+          "pointer-events-none absolute -top-[6%] bottom-[1%] w-[47%] transition-transform duration-500 ease-out motion-reduce:transition-none",
+          onOpen && "[@media(hover:hover)]:group-has-[button:hover]/card:scale-[1.04]",
           light ? "left-[1.5%]" : "right-[1.5%]",
         )}
       >
         <MenuImage url={item.image_url} name={item.name} dark={!light} />
       </div>
+
+      {onOpen && (
+        <>
+          {/* Indicatore "apri dettaglio" sull'angolo della foto. */}
+          <span
+            aria-hidden
+            className={cn(
+              "pointer-events-none absolute bottom-3.5 flex size-9 items-center justify-center rounded-full shadow-md backdrop-blur transition-transform duration-300 [@media(hover:hover)]:group-has-[button:hover]/card:scale-110",
+              light ? "left-3.5 bg-menu-brown/85 text-menu-cream" : "right-3.5 bg-menu-cream/90 text-menu-ink",
+            )}
+          >
+            <Plus className="size-4" />
+          </span>
+          {/* Pulsante esteso su tutta la scheda: un solo elemento interattivo, accessibile da tastiera. */}
+          <button
+            type="button"
+            onClick={onOpen}
+            aria-haspopup="dialog"
+            aria-label={`Dettagli di ${item.name}`}
+            className="absolute inset-0 z-10 cursor-pointer rounded-[inherit] outline-none focus-visible:ring-3 focus-visible:ring-menu-gold focus-visible:ring-offset-2 focus-visible:ring-offset-menu-page"
+          />
+        </>
+      )}
     </article>
   );
 }

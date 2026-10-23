@@ -183,3 +183,50 @@ describe("Immagine non caricabile", () => {
     expect(within(card).getByRole("img", { name: "Antico Burger" }).tagName).toBe("DIV");
   });
 });
+
+describe("Dettaglio prodotto", () => {
+  it("il tocco sulla scheda apre il dettaglio con foto, prezzo e ingredienti", async () => {
+    const { user } = renderWithProviders(<MenuView />);
+    const panini = await section("Panini");
+    await user.click(within(panini).getByRole("button", { name: "Dettagli di Antico Burger" }));
+
+    const dialog = await screen.findByRole("dialog", { name: "Antico Burger" });
+    expect(within(dialog).getByText("Panini")).toBeInTheDocument();
+    expect(within(dialog).getByText(/^Prezzo: 14,90\s€$/)).toBeInTheDocument();
+    expect(within(dialog).getByRole("img", { name: "Antico Burger" })).toBeInTheDocument();
+    const ingredients = within(within(dialog).getByRole("region", { name: "Ingredienti" })).getAllByRole("listitem");
+    expect(ingredients.map((item) => item.textContent)).toEqual(["Pane brioche", "manzo 200 g", "cheddar", "bacon"]);
+    expect(within(dialog).getByRole("link", { name: "Prenota un tavolo" })).toHaveAttribute("href", "/prenota");
+  });
+
+  it("si chiude con il pulsante e riporta il focus sulla scheda", async () => {
+    const { user } = renderWithProviders(<MenuView />);
+    const panini = await section("Panini");
+    const trigger = within(panini).getByRole("button", { name: "Dettagli di Classic Burger" });
+    await user.click(trigger);
+    const dialog = await screen.findByRole("dialog", { name: "Classic Burger" });
+    // Nessun ingrediente: nessuna sezione vuota.
+    expect(within(dialog).queryByRole("region", { name: "Ingredienti" })).not.toBeInTheDocument();
+    await user.click(within(dialog).getByRole("button", { name: "Chiudi" }));
+    await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
+    await waitFor(() => expect(trigger).toHaveFocus());
+  });
+
+  it("si chiude con Esc", async () => {
+    const { user } = renderWithProviders(<MenuView />);
+    const panini = await section("Panini");
+    await user.click(within(panini).getByRole("button", { name: "Dettagli di Poll-Gin" }));
+    await screen.findByRole("dialog", { name: "Poll-Gin" });
+    await user.keyboard("{Escape}");
+    await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
+  });
+
+  it("uno Special aperto dalla sezione Special mostra la sua categoria reale", async () => {
+    const { user } = renderWithProviders(<MenuView />);
+    const special = await section("Special");
+    await user.click(within(special).getByRole("button", { name: "Dettagli di Antico Burger" }));
+    const dialog = await screen.findByRole("dialog", { name: "Antico Burger" });
+    expect(within(dialog).getByText("Panini")).toBeInTheDocument();
+    expect(within(dialog).getByText("Special")).toBeInTheDocument();
+  });
+});

@@ -1,12 +1,17 @@
 "use client";
 
 import { UtensilsCrossed } from "lucide-react";
+import { useRef, useState, type MouseEvent } from "react";
 import { ErrorState, OfflineState } from "@/components/common/error-state";
 import { useHydrated } from "@/hooks/use-hydrated";
 import { useMenu } from "@/hooks/use-menu";
 import type { MenuCategory, MenuItem } from "@/lib/api/types";
 import { MenuCard, MenuCardSkeleton, type MenuTone } from "./menu-card";
 import { categorySectionId, MenuCategoryNav, SPECIAL_CATEGORY_ID } from "./menu-category-nav";
+import { MenuItemDialog, type MenuDetail } from "./menu-item-dialog";
+
+/** Apre il dettaglio di un prodotto (chiamato dal tocco sulla scheda). */
+type OpenDetail = (detail: MenuDetail, event: MouseEvent<HTMLButtonElement>) => void;
 
 /** Il menu si legge solo nel browser (dato del backend, mai prerenderizzato). */
 export function MenuView() {
@@ -17,6 +22,16 @@ export function MenuView() {
 function MenuContent() {
   const menu = useMenu();
   const categories = menu.data;
+  // Un solo dialog per la pagina. Il dettaglio resta impostato anche durante l'animazione di chiusura.
+  const [detail, setDetail] = useState<MenuDetail | null>(null);
+  const [open, setOpen] = useState(false);
+  const opener = useRef<HTMLElement | null>(null);
+
+  const openDetail: OpenDetail = (next, event) => {
+    opener.current = event.currentTarget;
+    setDetail(next);
+    setOpen(true);
+  };
 
   if (!categories) {
     if (menu.isError) {
@@ -41,21 +56,32 @@ function MenuContent() {
     ? { id: SPECIAL_CATEGORY_ID, name: "Special", items: specials }
     : null;
   const navCategories = special ? [special, ...categories] : categories;
+  // Categoria reale di ogni prodotto: nel dettaglio di uno Special si mostra "Panini", non "Special".
+  const categoryOf = new Map(categories.flatMap((category) => category.items.map((item) => [item.id, category.name])));
 
   return (
     <div className="flex flex-col gap-6">
       {navCategories.length > 1 && <MenuCategoryNav categories={navCategories} />}
       <div className="flex flex-col gap-14">
-        {special && <SpecialSection category={special} />}
+        {special && <SpecialSection category={special} categoryOf={categoryOf} onOpen={openDetail} />}
         {categories.map((category) => (
-          <CategorySection key={category.id} category={category} />
+          <CategorySection key={category.id} category={category} onOpen={openDetail} />
         ))}
       </div>
+      <MenuItemDialog detail={detail} open={open} onOpenChange={setOpen} returnFocus={opener} />
     </div>
   );
 }
 
-function SpecialSection({ category }: { category: MenuCategory }) {
+function SpecialSection({
+  category,
+  categoryOf,
+  onOpen,
+}: {
+  category: MenuCategory;
+  categoryOf: Map<number, string>;
+  onOpen: OpenDetail;
+}) {
   const headingId = `${categorySectionId(category)}-titolo`;
   return (
     <section
@@ -70,13 +96,19 @@ function SpecialSection({ category }: { category: MenuCategory }) {
         <span aria-hidden className="h-px flex-1 bg-menu-gold/60" />
       </h2>
       {category.items.map((item) => (
-        <MenuCard key={item.id} item={item} tone="special" idPrefix="special" />
+        <MenuCard
+          key={item.id}
+          item={item}
+          tone="special"
+          idPrefix="special"
+          onOpen={(event) => onOpen({ item, tone: "special", category: categoryOf.get(item.id) ?? "Special" }, event)}
+        />
       ))}
     </section>
   );
 }
 
-function CategorySection({ category }: { category: MenuCategory }) {
+function CategorySection({ category, onOpen }: { category: MenuCategory; onOpen: OpenDetail }) {
   const headingId = `${categorySectionId(category)}-titolo`;
   return (
     <section
@@ -94,7 +126,12 @@ function CategorySection({ category }: { category: MenuCategory }) {
       </h2>
       {/* Ordine ricevuto. Special con la propria scheda; gli altri alternati marrone/beige, da marrone in ogni categoria. */}
       {withTones(category.items).map(({ item, tone }) => (
-        <MenuCard key={item.id} item={item} tone={tone} />
+        <MenuCard
+          key={item.id}
+          item={item}
+          tone={tone}
+          onOpen={(event) => onOpen({ item, tone, category: category.name }, event)}
+        />
       ))}
     </section>
   );
