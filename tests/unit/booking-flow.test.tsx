@@ -4,7 +4,7 @@ import { describe, expect, it, vi } from "vitest";
 import { BookingFlow } from "@/components/booking/booking-flow";
 import { DRAFT_KEY } from "@/components/booking/booking-draft";
 import { STORAGE_KEY } from "@/lib/reservation-storage";
-import { API, settings } from "../msw/fixtures";
+import { API, calendarFor, CLOSURE_MESSAGE, settings } from "../msw/fixtures";
 import { apiError } from "../msw/handlers";
 import { server } from "../msw/server";
 import { renderWithProviders } from "../render";
@@ -98,6 +98,56 @@ describe("Step persone", () => {
 });
 
 describe("Step data", () => {
+  it("chiusura straordinaria: mostra il motivo scritto dall'admin", async () => {
+    const { user } = renderWithProviders(<BookingFlow />);
+    await user.click(await screen.findByRole("button", { name: "2 persone" }));
+    await user.click(screen.getByRole("button", { name: "Continua" }));
+    const grid = await screen.findByRole("grid", { name: "Ottobre 2026" });
+
+    const special = within(grid).getByRole("button", { name: `Lunedì 26 ottobre, chiuso: ${CLOSURE_MESSAGE}` });
+    expect(special).toHaveAttribute("title", CLOSURE_MESSAGE);
+    await user.click(special);
+    expect(screen.getByText("Lunedì 26 ottobre il ristorante è chiuso.", { exact: false })).toBeInTheDocument();
+    expect(screen.getByText(`“${CLOSURE_MESSAGE}”`)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Prima data libera: mercoledì 28 ottobre/ })).toBeInTheDocument();
+  });
+
+  it("chiusura senza messaggio (null o campo assente): riquadro invariato", async () => {
+    const { user } = renderWithProviders(<BookingFlow />);
+    await user.click(await screen.findByRole("button", { name: "2 persone" }));
+    await user.click(screen.getByRole("button", { name: "Continua" }));
+    const grid = await screen.findByRole("grid", { name: "Ottobre 2026" });
+    // 21: campo assente; 27: message null.
+    for (const name of ["Mercoledì 21 ottobre, chiuso", "Martedì 27 ottobre, chiuso"]) {
+      const day = within(grid).getByRole("button", { name });
+      expect(day).not.toHaveAttribute("title");
+      await user.click(day);
+      expect(screen.queryByText(/“.*”/)).not.toBeInTheDocument();
+    }
+  });
+
+  it("messaggio molto lungo: testo semplice che va a capo", async () => {
+    const long = "<b>Ferie</b> " + "Chiusura per lavori di ristrutturazione straordinaria ".repeat(8);
+    server.use(
+      http.get(`${API}/calendar`, ({ request }) => {
+        const month = new URL(request.url).searchParams.get("month")!;
+        const calendar = calendarFor(month, 2);
+        return HttpResponse.json({
+          data: { ...calendar, days: calendar.days.map((d) => (d.date === "2026-10-26" ? { ...d, message: long } : d)) },
+        });
+      }),
+    );
+    const { user } = renderWithProviders(<BookingFlow />);
+    await user.click(await screen.findByRole("button", { name: "2 persone" }));
+    await user.click(screen.getByRole("button", { name: "Continua" }));
+    const grid = await screen.findByRole("grid", { name: "Ottobre 2026" });
+    await user.click(within(grid).getByRole("button", { name: /^Lunedì 26 ottobre, chiuso/ }));
+    const text = screen.getByText(`“${long.trim()}”`);
+    // Mai interpretato come HTML.
+    expect(text.querySelector("b")).toBeNull();
+    expect(text).toHaveClass("[overflow-wrap:anywhere]");
+  });
+
   it("distingue i giorni del calendario e non seleziona quelli non disponibili", async () => {
     const { user } = renderWithProviders(<BookingFlow />);
     await user.click(await screen.findByRole("button", { name: "2 persone" }));

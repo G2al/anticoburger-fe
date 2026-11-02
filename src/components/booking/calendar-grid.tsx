@@ -3,7 +3,7 @@
 import { m } from "motion/react";
 import { useRef, useState, type KeyboardEvent } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
-import type { CalendarDay, CalendarDayStatus } from "@/lib/api/types";
+import { closureMessage, type CalendarDay, type CalendarDayStatus } from "@/lib/api/types";
 import { dayOfMonth, formatLongDate, weekdayIndex } from "@/lib/date";
 import { cn } from "@/lib/utils";
 
@@ -104,6 +104,7 @@ export function CalendarGrid({
             if (!day) return <div role="gridcell" key={c} className="h-11" />;
             const selected = day.date === selectedDate && day.status === "available";
             const available = day.status === "available";
+            const message = closureMessage(day);
             return (
               <div role="gridcell" key={day.date} aria-selected={selected}>
                 <button
@@ -115,7 +116,8 @@ export function CalendarGrid({
                   tabIndex={day.date === focusedDate ? 0 : -1}
                   aria-disabled={!available}
                   aria-current={day.date === today ? "date" : undefined}
-                  aria-label={`${formatLongDate(day.date)}, ${STATUS_LABEL[day.status]}`}
+                  aria-label={`${formatLongDate(day.date)}, ${STATUS_LABEL[day.status]}${message ? `: ${message}` : ""}`}
+                  title={message ?? undefined}
                   onFocus={() => setFocused(day.date)}
                   onKeyDown={(event) => onKeyDown(event, day.date)}
                   onClick={() => (available ? onSelect(day.date) : onUnavailable(day))}
@@ -137,6 +139,8 @@ export function CalendarGrid({
                     />
                   )}
                   {dayOfMonth(day.date)}
+                  {/* Chiusura straordinaria con motivo: il testo compare toccando il giorno. */}
+                  {message && <span className="absolute top-1 right-1 size-1.5 rounded-full bg-ring" aria-hidden />}
                   {day.date === today && (
                     <span
                       className={cn(

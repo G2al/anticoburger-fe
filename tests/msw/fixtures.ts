@@ -29,7 +29,11 @@ export function calendarFor(month: string, partySize: number): Calendar {
   const daysInMonth = new Date(Date.UTC(year, monthNumber, 0)).getUTCDate();
   const days = Array.from({ length: daysInMonth }, (_, i) => {
     const date = `${month}-${String(i + 1).padStart(2, "0")}`;
-    return { date, status: statusFor(date) };
+    const status = statusFor(date);
+    // 26/10: chiusura straordinaria con motivo; 21 e 27: chiusure senza messaggio (21 senza il campo, come un backend vecchio).
+    if (date === "2026-10-26") return { date, status, message: CLOSURE_MESSAGE };
+    if (date === "2026-10-21") return { date, status };
+    return { date, status, message: null };
   });
   return { month, party_size: partySize, days };
 }
@@ -40,6 +44,8 @@ function statusFor(date: string): CalendarDayStatus {
   if (date === "2026-10-23") return "fully_booked";
   return "available";
 }
+
+export const CLOSURE_MESSAGE = "Chiusura speciale odierna, ci scusiamo !";
 
 export const DEFAULT_SLOTS = ["12:30", "13:00", "19:00", "19:30", "20:00", "20:30", "21:00"];
 

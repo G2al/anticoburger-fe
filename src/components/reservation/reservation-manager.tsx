@@ -1,6 +1,6 @@
 "use client";
 
-import { CalendarSearch, Link2Off, SearchX } from "lucide-react";
+import { CalendarClock, CalendarSearch, Link2Off, SearchX } from "lucide-react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -23,6 +23,7 @@ import { buildLocalManageHref, parseManageHash } from "@/lib/manage-link";
 import { findStoredReservation, saveReservation } from "@/lib/reservation-storage";
 import { RemoveFromDeviceButton } from "./remove-from-device-button";
 import { ReservationDetails } from "./reservation-details";
+import { RescheduleFlow, type RescheduleOutcome } from "./reschedule-flow";
 
 const CancelReservationDialog = dynamic(() => import("./cancel-reservation-dialog"));
 
@@ -52,9 +53,7 @@ function ReservationManagerClient() {
   return (
     <section className="flex flex-1 flex-col">
       <div className="flex flex-col gap-6 px-safe pb-6 sm:px-6">
-        <h1 className="pt-2 text-[1.75rem] leading-tight font-semibold outline-none">
-          La tua prenotazione
-        </h1>
+        {(!reference || !token) && <PageTitle />}
         {!reference ? (
           <EmptyState
             icon={<CalendarSearch className="size-7 text-brass" aria-hidden />}
@@ -88,6 +87,8 @@ function LoadedReservation({ reference, token }: { reference: string; token: str
   const storedOnDevice = useStoredReservations().some((item) => item.reference === reference);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [alreadyCancelledNotice, setAlreadyCancelledNotice] = useState(false);
+  const [rescheduling, setRescheduling] = useState(false);
+  const [outcome, setOutcome] = useState<Exclude<RescheduleOutcome, { kind: "cancelled" }> | null>(null);
   const [now] = useState(() => new Date());
   const reservation = query.data;
 
@@ -102,19 +103,59 @@ function LoadedReservation({ reference, token }: { reference: string; token: str
 
   if (query.isError) {
     const code = isApiError(query.error) ? query.error.code : null;
-    if (code === "RESERVATION_NOT_FOUND" || code === "RESERVATION_TOKEN_MISSING") {
-      return <NotFoundState reference={reference} message={describeError(query.error).message} />;
-    }
-    return <ErrorState error={query.error} onRetry={() => query.refetch()} retrying={query.isFetching} />;
+    return (
+      <>
+        <PageTitle />
+        {code === "RESERVATION_NOT_FOUND" || code === "RESERVATION_TOKEN_MISSING" ? (
+          <NotFoundState reference={reference} message={describeError(query.error).message} />
+        ) : (
+          <ErrorState error={query.error} onRetry={() => query.refetch()} retrying={query.isFetching} />
+        )}
+      </>
+    );
   }
 
-  if (!reservation) return query.fetchStatus === "paused" ? <OfflineState /> : <ReservationDetailsSkeleton />;
+  if (!reservation) {
+    return (
+      <>
+        <PageTitle />
+        {query.fetchStatus === "paused" ? <OfflineState /> : <ReservationDetailsSkeleton />}
+      </>
+    );
+  }
 
   const past = isPast(reservation.date, reservation.time, now);
   const cancelled = reservation.status === "cancelled";
+  // Modificabile solo se confermata e non ancora iniziata.
+  const modifiable = !cancelled && new Date(reservation.starts_at).getTime() > now.getTime();
+
+  function closeReschedule(result: RescheduleOutcome) {
+    setRescheduling(false);
+    setOutcome(result.kind === "cancelled" ? null : result);
+    if (result.kind === "updated") toast.success("Prenotazione modificata");
+    window.scrollTo({ top: 0 });
+  }
+
+  if (rescheduling) {
+    return (
+      // Gli step hanno già i propri margini laterali e la barra azioni.
+      <div className="-mx-5 flex flex-1 flex-col sm:-mx-6">
+        <RescheduleFlow reservation={reservation} token={token} onClose={closeReschedule} />
+      </div>
+    );
+  }
 
   return (
     <>
+      <PageTitle />
+      {outcome?.kind === "updated" && (
+        <Notice title="Prenotazione modificata ✅">Ti abbiamo inviato la conferma su WhatsApp.</Notice>
+      )}
+      {outcome?.kind === "message" && (
+        <Notice tone={outcome.tone} title={outcome.title}>
+          {outcome.message}
+        </Notice>
+      )}
       {cancelled && (
         <Notice title="Prenotazione annullata">
           {alreadyCancelledNotice
@@ -127,17 +168,26 @@ function LoadedReservation({ reference, token }: { reference: string; token: str
 
       {!cancelled && !past && (
         <>
-          <p className="text-sm text-pretty text-muted-foreground">
-            Non è possibile modificare una prenotazione: per cambiare data, orario o persone annullala e prenota di
-            nuovo.
-          </p>
           <BottomActionBar className="-mx-5 sm:-mx-6">
             {!online && (
               <p className="text-center text-sm text-muted-foreground">
-                Sei offline: potrai annullare appena torna la connessione.
+                Sei offline: potrai modificare o annullare appena torna la connessione.
               </p>
             )}
-            <Button variant="destructive" size="xl" onClick={() => setDialogOpen(true)} disabled={!online}>
+            {modifiable && (
+              <Button
+                size="xl"
+                onClick={() => {
+                  setOutcome(null);
+                  setRescheduling(true);
+                }}
+                disabled={!online}
+              >
+                <CalendarClock aria-hidden data-icon="inline-start" />
+                Modifica prenotazione
+              </Button>
+            )}
+            <Button variant="destructive" size="lg" onClick={() => setDialogOpen(true)} disabled={!online}>
               Annulla prenotazione
             </Button>
           </BottomActionBar>
@@ -178,6 +228,10 @@ function LoadedReservation({ reference, token }: { reference: string; token: str
       )}
     </>
   );
+}
+
+function PageTitle() {
+  return <h1 className="pt-2 text-[1.75rem] leading-tight font-semibold outline-none">La tua prenotazione</h1>;
 }
 
 function NotFoundState({ reference, message }: { reference: string; message: string }) {

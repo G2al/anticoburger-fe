@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { useBookingSettings } from "@/hooks/use-booking-settings";
 import { useCalendar } from "@/hooks/use-calendar";
 import { isApiError } from "@/lib/api/errors";
-import type { CalendarDay } from "@/lib/api/types";
+import { closureMessage, type CalendarDay } from "@/lib/api/types";
 import { addMonths, calendarMonthRange, formatLongDate, formatMonth, monthOf, todayInRome } from "@/lib/date";
 import { CalendarGrid, CalendarLegend, CalendarSkeleton } from "./calendar-grid";
 import { StepHeader } from "./step-header";
@@ -173,10 +173,17 @@ function UnavailableHint({
         ? `${label} il ristorante è chiuso.`
         : `${label} non è prenotabile online.`;
   const next = days.find((candidate) => candidate.date > day.date && candidate.status === "available");
+  // Testo libero dell'admin: reso come testo semplice (React lo esegue sempre in escape), va a capo se lungo.
+  const message = closureMessage(day);
 
   return (
     <Notice>
       {reason}{" "}
+      {message && (
+        <span className="my-1 block font-medium italic [overflow-wrap:anywhere] whitespace-pre-line">
+          “{message}”
+        </span>
+      )}
       {next ? (
         <Button
           variant="link"

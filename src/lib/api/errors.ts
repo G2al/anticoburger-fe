@@ -107,6 +107,14 @@ const ERROR_INFO: Record<ErrorCode, ErrorInfo> = {
     message: "Prenotazione non trovata o link non valido. Per assistenza contatta il ristorante.",
     action: "contact",
   },
+  RESERVATION_CANCELLED: {
+    message: "La prenotazione è stata annullata e non si può più modificare.",
+    action: "none",
+  },
+  RESERVATION_NOT_MODIFIABLE: {
+    message: "La prenotazione è già iniziata o passata e non si può più modificare.",
+    action: "contact",
+  },
 };
 
 /** Messaggio italiano e azione per qualsiasi errore (basato su `code`, mai sul testo). */

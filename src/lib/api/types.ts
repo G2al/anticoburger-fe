@@ -13,6 +13,8 @@ export type ApiErrorCode =
   | "PHONE_DAILY_LIMIT_REACHED"
   | "RESERVATION_TOKEN_MISSING"
   | "RESERVATION_NOT_FOUND"
+  | "RESERVATION_CANCELLED"
+  | "RESERVATION_NOT_MODIFIABLE"
   | "NOT_FOUND"
   | "METHOD_NOT_ALLOWED"
   | "TOO_MANY_REQUESTS"
@@ -51,7 +53,20 @@ export type BookingHours = {
 
 export type CalendarDayStatus = "available" | "fully_booked" | "closed" | "not_bookable";
 
-export type CalendarDay = { date: string; status: CalendarDayStatus };
+export type CalendarDay = {
+  date: string;
+  status: CalendarDayStatus;
+  /**
+   * Motivo scritto dall'admin, solo per le chiusure straordinarie dell'intero ristorante (status "closed").
+   * null per la chiusura settimanale e per gli altri stati. Assente con un backend non aggiornato: trattarlo come null.
+   */
+  message?: string | null;
+};
+
+/** Messaggio di chiusura straordinaria del giorno, se presente. */
+export function closureMessage(day: CalendarDay): string | null {
+  return day.status === "closed" ? (day.message?.trim() || null) : null;
+}
 
 export type Calendar = {
   month: string;
@@ -74,6 +89,13 @@ export type CreateReservationInput = {
   phone: string;
   email?: string | null;
   notes?: string | null;
+};
+
+/** Nuovi valori per POST /reservations/{reference}/reschedule (time = uno slot di /availability). */
+export type RescheduleReservationInput = {
+  date: string;
+  time: string;
+  party_size: number;
 };
 
 export type ReservationStatus = "confirmed" | "cancelled";

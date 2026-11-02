@@ -7,6 +7,7 @@ import type {
   CreatedReservation,
   CreateReservationInput,
   MenuCategory,
+  RescheduleReservationInput,
   Reservation,
 } from "./types";
 
@@ -41,6 +42,18 @@ export function cancelReservation(reference: string, token: string) {
   return apiRequest<Reservation>(`/reservations/${encodeURIComponent(reference)}/cancel`, {
     method: "POST",
     token,
+  });
+}
+
+/**
+ * Sposta la prenotazione su nuova data/ora/persone. Atomica: se fallisce l'originale resta invariata.
+ * Riferimento e token non cambiano. Non va ripetuta automaticamente.
+ */
+export function rescheduleReservation(reference: string, token: string, input: RescheduleReservationInput) {
+  return apiRequest<Reservation>(`/reservations/${encodeURIComponent(reference)}/reschedule`, {
+    method: "POST",
+    token,
+    body: input,
   });
 }
 
