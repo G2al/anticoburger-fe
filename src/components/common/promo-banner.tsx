@@ -61,7 +61,8 @@ function PromoBannerContent({ className }: { className?: string }) {
       </button>
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="max-h-[calc(100dvh-2rem)] w-auto gap-0 overflow-hidden bg-[#3a0a0f] p-0 sm:max-w-sm">
+        {/* Larghezza massima possibile mantenendo il formato 9:16: limitata dalla larghezza o dall'altezza dello schermo. */}
+        <DialogContent className="w-[min(calc(100vw-1.5rem),calc((100dvh-3rem)*9/16),28rem)] max-w-none gap-0 overflow-hidden bg-[#3a0a0f] p-0 sm:max-w-none">
           <DialogTitle className="sr-only">{promo.title}</DialogTitle>
           <DialogDescription className="sr-only">{promo.summary}</DialogDescription>
           <Image
@@ -69,8 +70,8 @@ function PromoBannerContent({ className }: { className?: string }) {
             alt={promo.image.alt}
             width={promo.image.width}
             height={promo.image.height}
-            sizes="(min-width: 640px) 384px, 100vw"
-            className="h-auto max-h-[calc(100dvh-2rem)] w-full object-contain"
+            sizes="(min-width: 640px) 448px, 100vw"
+            className="h-auto w-full"
           />
         </DialogContent>
       </Dialog>
