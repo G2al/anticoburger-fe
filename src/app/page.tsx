@@ -1,6 +1,7 @@
 import { ArrowRight, UtensilsCrossed } from "lucide-react";
 import Link from "next/link";
 import { ContactRestaurant } from "@/components/common/contact-restaurant";
+import { PromoBanner } from "@/components/common/promo-banner";
 import { BookingHours } from "@/components/home/booking-hours";
 import { AppShell } from "@/components/layout/app-shell";
 import { BottomActionBar } from "@/components/layout/bottom-action-bar";
@@ -32,6 +33,8 @@ export default function HomePage() {
           </div>
 
           <NextReservationCard />
+
+          <PromoBanner />
 
           <InstallPromptLoader />
 

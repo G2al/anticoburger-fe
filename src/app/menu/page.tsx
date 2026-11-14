@@ -1,6 +1,7 @@
 import { ArrowRight } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
+import { PromoBanner } from "@/components/common/promo-banner";
 import { AppShell } from "@/components/layout/app-shell";
 import { BottomActionBar } from "@/components/layout/bottom-action-bar";
 import { Header } from "@/components/layout/header";
@@ -22,6 +23,7 @@ export default function MenuPage() {
       <main className="flex flex-1 flex-col">
         <div className="flex flex-col gap-10 px-safe pt-2 pb-8 sm:px-6">
           <MenuHeader />
+          <PromoBanner />
           {/* Dati dal backend (GET /menu), caricati solo nel browser. */}
           <MenuView />
         </div>
